@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>利用企業マスタ 利用区分別分析レポート</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+  body { background:#0f172a; color:#e2e8f0; font-family:'Segoe UI','Hiragino Sans',sans-serif; }
+  .card { background:#1e293b; border-radius:14px; border:1px solid #334155; }
+  .kpi-val { font-size:1.8rem; font-weight:800; line-height:1.1; }
+  .badge { display:inline-block; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:700; letter-spacing:0.5px; }
+  .b-shin { background:#312e8133; color:#a5b4fc; }
+  .b-chu  { background:#713f1233; color:#fbbf24; }
+  .b-both { background:#065f4633; color:#6ee7b7; }
+  .b-shin-all { background:#1e1b4b55; color:#c4b5fd; }
+  .b-chu-all  { background:#451a0355; color:#fdba74; }
+  .highlight { color:#38bdf8; font-weight:700; }
+  .insight-box { background:#0f172a; border:1px solid #334155; border-radius:10px; padding:12px; }
+  .tbl { width:100%; border-collapse:collapse; font-size:11px; }
+  .tbl th { background:#334155; color:#cbd5e1; padding:6px 8px; text-align:left; font-weight:600; white-space:nowrap; }
+  .tbl td { padding:5px 8px; border-bottom:1px solid #1e293b; }
+  .tbl tr:hover td { background:#334155; }
+  ::-webkit-scrollbar { width:5px; } ::-webkit-scrollbar-thumb { background:#475569; border-radius:4px; }
+</style>
+</head>
+<body class="p-4 md:p-6">
+<div class="max-w-[1440px] mx-auto">
+
+<!-- HEADER -->
+<div class="mb-5">
+  <div class="flex items-center gap-3 mb-1">
+    <div class="text-3xl">🏢</div>
+    <div>
+      <h1 class="text-2xl md:text-3xl font-bold">利用企業マスタ 利用区分別特徴分析</h1>
+      <p class="text-slate-400 text-sm">データソース：利用企業マスタ（1,386社）</p>
+    </div>
+  </div>
+  <p class="text-slate-500 text-xs mt-1">2026年3月2日時点 ｜ 5つの観点：新卒 / 新卒(両方利用込) / 中途 / 中途(両方利用込) / 両方利用</p>
+</div>
+
+<!-- KPI CARDS -->
+<div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
+  <div class="card p-3 text-center border-l-4" style="border-left-color:#818cf8;">
+    <div class="text-xs text-slate-400 mb-1"><span class="badge b-shin">新卒利用</span></div>
+    <div class="kpi-val text-indigo-400">807</div>
+    <div class="text-slate-500 text-xs">58.2%</div>
+  </div>
+  <div class="card p-3 text-center border-l-4" style="border-left-color:#c4b5fd;">
+    <div class="text-xs text-slate-400 mb-1"><span class="badge b-shin-all">新卒(両方込)</span></div>
+    <div class="kpi-val text-violet-300">1,148</div>
+    <div class="text-slate-500 text-xs">82.8%</div>
+  </div>
+  <div class="card p-3 text-center border-l-4" style="border-left-color:#fbbf24;">
+    <div class="text-xs text-slate-400 mb-1"><span class="badge b-chu">中途利用</span></div>
+    <div class="kpi-val text-amber-400">238</div>
+    <div class="text-slate-500 text-xs">17.2%</div>
+  </div>
+  <div class="card p-3 text-center border-l-4" style="border-left-color:#fdba74;">
+    <div class="text-xs text-slate-400 mb-1"><span class="badge b-chu-all">中途(両方込)</span></div>
+    <div class="kpi-val text-orange-300">579</div>
+    <div class="text-slate-500 text-xs">41.8%</div>
+  </div>
+  <div class="card p-3 text-center border-l-4" style="border-left-color:#34d399;">
+    <div class="text-xs text-slate-400 mb-1"><span class="badge b-both">両方利用</span></div>
+    <div class="kpi-val text-emerald-400">341</div>
+    <div class="text-slate-500 text-xs">24.6%</div>
+  </div>
+</div>
+
+<!-- ===== Section 1: 5観点 サマリーテーブル ===== -->
+<div class="card p-4 mb-4">
+  <h2 class="text-base font-bold mb-3">📋 5観点サマリー比較</h2>
+  <div class="overflow-x-auto">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>指標</th>
+          <th style="color:#a5b4fc;">新卒</th>
+          <th style="color:#c4b5fd;">新卒(両方込)</th>
+          <th style="color:#fbbf24;">中途</th>
+          <th style="color:#fdba74;">中途(両方込)</th>
+          <th style="color:#6ee7b7;">両方利用</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="font-semibold">社数</td>
+          <td>807社</td><td>1,148社</td><td>238社</td><td>579社</td><td>341社</td>
+        </tr>
+        <tr>
+          <td class="font-semibold">従業員数（中央値）</td>
+          <td>276名</td><td>296名</td><td class="highlight">157名</td><td>240名</td><td class="highlight">344名</td>
+        </tr>
+        <tr>
+          <td class="font-semibold">従業員数（平均）</td>
+          <td>916名</td><td>909名</td><td>865名</td><td>882名</td><td>894名</td>
+        </tr>
+        <tr>
+          <td class="font-semibold">従業員数 Q1-Q3</td>
+          <td>108~755</td><td>113~750</td><td class="highlight">61~508</td><td>90~680</td><td>129~743</td>
+        </tr>
+        <tr>
+          <td class="font-semibold">LINE利用率</td>
+          <td class="highlight">78.1%</td><td>75.3%</td><td class="text-red-300">28.2%</td><td>52.0%</td><td>68.6%</td>
+        </tr>
+        <tr>
+          <td class="font-semibold">東京比率</td>
+          <td>52.3%</td><td>52.2%</td><td class="highlight">52.9%</td><td>52.3%</td><td>51.9%</td>
+        </tr>
+        <tr>
+          <td class="font-semibold">関東比率</td>
+          <td>61.6%</td><td>61.9%</td><td>62.2%</td><td>62.3%</td><td>62.5%</td>
+        </tr>
+        <tr>
+          <td class="font-semibold">掲載可率</td>
+          <td>31.0%</td><td>31.5%</td><td>34.0%</td><td>33.3%</td><td>32.8%</td>
+        </tr>
+        <tr>
+          <td class="font-semibold">TOP業界1位</td>
+          <td>IT(15.5%)</td><td>IT(15.7%)</td><td>機械(17.6%)</td><td>機械(16.1%)</td><td>IT(16.1%)</td>
+        </tr>
+        <tr>
+          <td class="font-semibold">TOP業界2位</td>
+          <td>機械(13.5%)</td><td>機械(13.9%)</td><td>IT(16.8%)</td><td>IT(16.4%)</td><td>機械(15.0%)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== Section 2: Charts Row 1 ===== -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+  <div class="card p-4">
+    <h2 class="text-base font-bold mb-2">🏢 従業員規模×利用区分（5観点）</h2>
+    <div id="chartSize" style="height:360px;"></div>
+  </div>
+  <div class="card p-4">
+    <h2 class="text-base font-bold mb-2">📊 従業員数分布（箱ひげ図）</h2>
+    <div id="chartBox" style="height:360px;"></div>
+  </div>
+</div>
+
+<!-- ===== Section 3: Charts Row 2 ===== -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+  <div class="card p-4">
+    <h2 class="text-base font-bold mb-2">🏭 業界別構成比（5観点 TOP12）</h2>
+    <div id="chartInd" style="height:420px;"></div>
+  </div>
+  <div class="card p-4">
+    <h2 class="text-base font-bold mb-2">📱 LINE利用率×利用区分</h2>
+    <div id="chartLine" style="height:200px;"></div>
+    <h2 class="text-base font-bold mt-3 mb-2">🗺️ エリア構成比×利用区分</h2>
+    <div id="chartRegion" style="height:200px;"></div>
+  </div>
+</div>
+
+<!-- ===== Section 4: 契約開始年 ===== -->
+<div class="card p-4 mb-4">
+  <h2 class="text-base font-bold mb-2">📅 契約開始年×利用区分</h2>
+  <div id="chartYear" style="height:300px;"></div>
+</div>
+
+<!-- ===== Section 5: Insights ===== -->
+<div class="card p-4 mb-4">
+  <h2 class="text-lg font-bold mb-3">🔍 利用区分ごとの特徴（ファクトベース）</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+
+    <div class="insight-box">
+      <div class="flex items-center gap-2 mb-2"><span class="badge b-shin">新卒利用</span><span class="font-bold text-indigo-300">807社の特徴</span></div>
+      <ul class="text-xs text-slate-300 space-y-1 list-disc pl-4">
+        <li>従業員中央値 <b>276名</b>（中途の1.76倍）→中堅企業が主流</li>
+        <li>LINE利用率 <b>78.1%</b> で最高→新卒採用はLINEと親和性大</li>
+        <li>IT(15.5%) > 機械(13.5%) > 建設(10.9%)の順</li>
+        <li>東海エリア比率 9.5%で中途(7.6%)より高い→製造業の新卒需要か</li>
+      </ul>
+    </div>
+
+    <div class="insight-box">
+      <div class="flex items-center gap-2 mb-2"><span class="badge b-shin-all">新卒(両方込)</span><span class="font-bold text-violet-300">1,148社の特徴</span></div>
+      <ul class="text-xs text-slate-300 space-y-1 list-disc pl-4">
+        <li>全体の <b>82.8%</b> が新卒を利用→圧倒的に新卒利用が主力</li>
+        <li>従業員中央値 <b>296名</b>（両方込みで少し引き上がる）</li>
+        <li>LINE利用率 <b>75.3%</b>（中途込みが入っても高水準維持）</li>
+        <li>中国・北陸エリアの比率が中途(両方込)より若干高い</li>
+      </ul>
+    </div>
+
+    <div class="insight-box">
+      <div class="flex items-center gap-2 mb-2"><span class="badge b-chu">中途利用</span><span class="font-bold text-amber-300">238社の特徴</span></div>
+      <ul class="text-xs text-slate-300 space-y-1 list-disc pl-4">
+        <li>従業員中央値 <b>157名</b>（全区分で最小）→小規模企業が中心</li>
+        <li>LINE利用率 <b>28.2%</b>（新卒78%の約1/3）→<span class="text-red-300 font-bold">最大の差異ポイント</span></li>
+        <li>機械(17.6%) > IT(16.8%)→中途では機械がIT逆転</li>
+        <li>医療・福祉(7.1%)が新卒(4.5%)より高比率→即戦力需要の表れ</li>
+        <li>九州・沖縄比率 <b>6.7%</b> で新卒(4.6%)を上回る</li>
+      </ul>
+    </div>
+
+    <div class="insight-box">
+      <div class="flex items-center gap-2 mb-2"><span class="badge b-chu-all">中途(両方込)</span><span class="font-bold text-orange-300">579社の特徴</span></div>
+      <ul class="text-xs text-slate-300 space-y-1 list-disc pl-4">
+        <li>全体の <b>41.8%</b>→中途市場はまだ拡大余地あり</li>
+        <li>従業員中央値 <b>240名</b>（中途のみ157→両方込みで大幅UP）</li>
+        <li>LINE利用率 <b>52.0%</b>（両方利用68.6%が引き上げ）</li>
+        <li>両方利用企業を含めると業界TOP3はIT→機械→コンサルに</li>
+      </ul>
+    </div>
+
+    <div class="insight-box">
+      <div class="flex items-center gap-2 mb-2"><span class="badge b-both">両方利用</span><span class="font-bold text-emerald-300">341社の特徴</span></div>
+      <ul class="text-xs text-slate-300 space-y-1 list-disc pl-4">
+        <li>従業員中央値 <b>344名</b>（全区分で最大）→<span class="text-emerald-300 font-bold">大規模企業ほど両方利用</span></li>
+        <li>LINE利用率 <b>68.6%</b>（新卒のみに次ぐ高さ）</li>
+        <li>IT(16.1%) > 機械(15.0%) > コンサル(10.0%)→IT・機械が拮抗</li>
+        <li>関西比率 <b>19.1%</b> で全区分最高→関西大手の両方利用傾向</li>
+      </ul>
+    </div>
+
+    <div class="insight-box border-cyan-800">
+      <div class="flex items-center gap-2 mb-2"><span class="text-lg">💡</span><span class="font-bold text-cyan-300">利用区分間の主要な差異まとめ</span></div>
+      <ul class="text-xs text-slate-300 space-y-1 list-disc pl-4">
+        <li><b>最大の差異はLINE利用率：</b>新卒78% vs 中途28%（50pt差）</li>
+        <li><b>企業規模の明確な序列：</b>両方(344) > 新卒(276) > 中途(157)</li>
+        <li><b>業界は概ね共通</b>だが中途は医療・福祉、運輸の比率が相対的に高い</li>
+        <li><b>地域差は小さい</b>が中途は九州比率が高く、新卒は東海が高い</li>
+        <li><b>示唆：</b>中途のみ企業にLINE利用を促進 & 新卒のみ企業に中途拡張提案が有効</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<script>
+const COLORS = {
+  shin:'#818cf8', shinAll:'#c4b5fd', chu:'#fbbf24', chuAll:'#fdba74', both:'#34d399'
+};
+const fiveViews = ['新卒利用','新卒(両方込)','中途利用','中途(両方込)','両方利用'];
+const indTotals = {'新卒利用':807,'新卒(両方込)':1148,'中途利用':238,'中途(両方込)':579,'両方利用':341};
+const fiveColors = [COLORS.shin,COLORS.shinAll,COLORS.chu,COLORS.chuAll,COLORS.both];
+
+// --- 従業員規模 × 利用区分 ---
+const sizeOrder = ['1~50','51~100','101~300','301~500','501~1000','1001~2000','2001~'];
+const sizeData = {
+  '新卒利用':    {t:807, d:{'1~50':77,'51~100':107,'101~300':229,'301~500':119,'501~1000':126,'1001~2000':74,'2001~':75}},
+  '中途利用':    {t:238, d:{'1~50':51,'51~100':34,'101~300':73,'301~500':20,'501~1000':24,'1001~2000':16,'2001~':20}},
+  '両方利用':    {t:341, d:{'1~50':30,'51~100':33,'101~300':96,'301~500':56,'501~1000':64,'1001~2000':32,'2001~':30}}
+};
+sizeData['新卒(両方込)'] = {t:1148, d:{}};
+sizeData['中途(両方込)'] = {t:579, d:{}};
+sizeOrder.forEach(s => {
+  sizeData['新卒(両方込)'].d[s] = (sizeData['新卒利用'].d[s]||0) + (sizeData['両方利用'].d[s]||0);
+  sizeData['中途(両方込)'].d[s] = (sizeData['中途利用'].d[s]||0) + (sizeData['両方利用'].d[s]||0);
+});
+
+const c1 = echarts.init(document.getElementById('chartSize'));
+const sizeColors = ['#ef4444','#f97316','#eab308','#22c55e','#06b6d4','#3b82f6','#8b5cf6'];
+c1.setOption({
+  tooltip:{trigger:'axis',axisPointer:{type:'shadow'},
+    formatter:ps => {
+      let h=ps[0].axisValue+'<br/>';
+      ps.forEach(p => h += `${p.marker}${p.seriesName}: ${p.value}%<br/>`);
+      return h;
+    }},
+  legend:{data:sizeOrder,textStyle:{color:'#94a3b8',fontSize:9},top:0,type:'scroll'},
+  grid:{left:100,right:20,top:35,bottom:20},
+  xAxis:{type:'value',max:100,axisLabel:{formatter:'{value}%',color:'#94a3b8',fontSize:9},splitLine:{lineStyle:{color:'#334155'}}},
+  yAxis:{type:'category',data:fiveViews,inverse:true,axisLabel:{color:'#cbd5e1',fontSize:10}},
+  series: sizeOrder.map((s,i) => ({
+    name:s,type:'bar',stack:'total',
+    data:fiveViews.map(v => +(sizeData[v].d[s]/sizeData[v].t*100).toFixed(1)),
+    itemStyle:{color:sizeColors[i]},
+    label:{show:true,position:'inside',formatter:p=>p.value>5?p.value+'%':'',fontSize:9,color:'#fff'}
+  }))
+});
+
+// --- Box plot ---
+const c2 = echarts.init(document.getElementById('chartBox'));
+const boxData = [
+  {n:'新卒利用',q1:108,med:276,q3:755},
+  {n:'新卒(両方込)',q1:113,med:296,q3:750},
+  {n:'中途利用',q1:61,med:157,q3:508},
+  {n:'中途(両方込)',q1:90,med:240,q3:680},
+  {n:'両方利用',q1:129,med:344,q3:743}
+];
+const boxColors = fiveColors;
+c2.setOption({
+  tooltip:{trigger:'axis'},
+  grid:{left:100,right:40,top:10,bottom:30},
+  xAxis:{type:'value',max:2500,axisLabel:{color:'#94a3b8',fontSize:9},splitLine:{lineStyle:{color:'#334155'}},name:'従業員数',nameTextStyle:{color:'#64748b',fontSize:9}},
+  yAxis:{type:'category',data:boxData.map(d=>d.n),inverse:true,axisLabel:{color:'#cbd5e1',fontSize:10}},
+  series:[
+    {type:'custom',renderItem:(params,api)=>{
+      const idx = api.value(0);
+      const q1 = api.coord([boxData[idx].q1, idx]);
+      const q3 = api.coord([boxData[idx].q3, idx]);
+      const h = api.size([0,1])[1]*0.5;
+      return {type:'rect',shape:{x:q1[0],y:q1[1]-h/2,width:q3[0]-q1[0],height:h},
+        style:{fill:boxColors[idx]+'66',stroke:boxColors[idx],lineWidth:2}};
+    },encode:{x:0,y:0},data:boxData.map((_,i)=>[i])},
+    {type:'custom',renderItem:(params,api)=>{
+      const idx = api.value(0);
+      const pt = api.coord([boxData[idx].med, idx]);
+      const h = api.size([0,1])[1]*0.5;
+      return {type:'line',shape:{x1:pt[0],y1:pt[1]-h/2,x2:pt[0],y2:pt[1]+h/2},
+        style:{stroke:'#fff',lineWidth:3}};
+    },encode:{x:0,y:0},data:boxData.map((_,i)=>[i])},
+    {type:'scatter',symbolSize:0,data:boxData.map((d,i)=>[d.med,i]),
+      label:{show:true,position:'top',formatter:p=>`中央値:${boxData[p.dataIndex].med} | Q1:${boxData[p.dataIndex].q1} | Q3:${boxData[p.dataIndex].q3}`,
+        color:'#94a3b8',fontSize:9},tooltip:{formatter:p=>{const d=boxData[p.dataIndex];return`<b>${d.n}</b><br/>Q1: ${d.q1}<br/>中央値: ${d.med}<br/>Q3: ${d.q3}`}}
+    }
+  ]
+});
+
+// --- 業界構成比 ---
+const topInd = ['IT','機械業界','建設・工事','コンサルティング','小売','その他サービス','医療・福祉','エンタメ','不動産業界','商社','外食','自動車・乗り物'];
+const indRaw = {
+  '新卒利用':{IT:125,'機械業界':109,'建設・工事':88,'コンサルティング':73,'小売':57,'その他サービス':34,'医療・福祉':36,'エンタメ':40,'不動産業界':35,'商社':32,'外食':27,'自動車・乗り物':14},
+  '中途利用':{IT:40,'機械業界':42,'建設・工事':12,'コンサルティング':16,'小売':10,'その他サービス':16,'医療・福祉':17,'エンタメ':9,'不動産業界':8,'商社':10,'外食':9,'自動車・乗り物':4},
+  '両方利用':{IT:55,'機械業界':51,'建設・工事':31,'コンサルティング':34,'小売':25,'その他サービス':18,'医療・福祉':14,'エンタメ':7,'不動産業界':12,'商社':10,'外食':9,'自動車・乗り物':11}
+};
+indRaw['新卒(両方込)'] = {};
+indRaw['中途(両方込)'] = {};
+topInd.forEach(ind => {
+  indRaw['新卒(両方込)'][ind] = (indRaw['新卒利用'][ind]||0)+(indRaw['両方利用'][ind]||0);
+  indRaw['中途(両方込)'][ind] = (indRaw['中途利用'][ind]||0)+(indRaw['両方利用'][ind]||0);
+});
+
+const c3 = echarts.init(document.getElementById('chartInd'));
+c3.setOption({
+  tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+  legend:{data:fiveViews,textStyle:{color:'#94a3b8',fontSize:9},top:0},
+  grid:{left:100,right:20,top:30,bottom:20},
+  xAxis:{type:'value',axisLabel:{formatter:'{value}%',color:'#94a3b8',fontSize:9},splitLine:{lineStyle:{color:'#334155'}}},
+  yAxis:{type:'category',data:topInd,inverse:true,axisLabel:{color:'#cbd5e1',fontSize:10}},
+  series: fiveViews.map((v,vi) => ({
+    name:v,type:'bar',barGap:'10%',
+    data:topInd.map(ind => +((indRaw[v][ind]||0)/indTotals[v]*100).toFixed(1)),
+    itemStyle:{color:fiveColors[vi]},
+    label:{show:false}
+  }))
+});
+
+// --- LINE利用率 ---
+const c4 = echarts.init(document.getElementById('chartLine'));
+const lineRates = [
+  {n:'新卒利用',r:78.1},{n:'新卒(両方込)',r:75.3},{n:'中途利用',r:28.2},{n:'中途(両方込)',r:52.0},{n:'両方利用',r:68.6}
+];
+c4.setOption({
+  tooltip:{trigger:'axis'},
+  grid:{left:100,right:40,top:10,bottom:20},
+  xAxis:{type:'value',max:100,axisLabel:{formatter:'{value}%',color:'#94a3b8',fontSize:9},splitLine:{lineStyle:{color:'#334155'}}},
+  yAxis:{type:'category',data:lineRates.map(d=>d.n),inverse:true,axisLabel:{color:'#cbd5e1',fontSize:10}},
+  series:[{type:'bar',data:lineRates.map((d,i)=>({value:d.r,itemStyle:{color:fiveColors[i]}})),
+    label:{show:true,position:'right',formatter:'{c}%',color:'#cbd5e1',fontSize:10,fontWeight:'bold'},barWidth:20}]
+});
+
+// --- エリア構成比 ---
+const regions = ['関東','関西','東海','九州・沖縄','北海道・東北','北陸・甲信越','中国','四国'];
+const regRaw = {
+  '新卒利用':{関東:497,関西:119,東海:77,'九州・沖縄':37,'北海道・東北':20,'北陸・甲信越':27,中国:25,四国:5},
+  '中途利用':{関東:148,関西:40,東海:18,'九州・沖縄':16,'北海道・東北':5,'北陸・甲信越':5,中国:5,四国:1},
+  '両方利用':{関東:213,関西:65,東海:27,'九州・沖縄':11,'北海道・東北':10,'北陸・甲信越':6,中国:5,四国:3}
+};
+regRaw['新卒(両方込)'] = {};
+regRaw['中途(両方込)'] = {};
+regions.forEach(r => {
+  regRaw['新卒(両方込)'][r] = (regRaw['新卒利用'][r]||0)+(regRaw['両方利用'][r]||0);
+  regRaw['中途(両方込)'][r] = (regRaw['中途利用'][r]||0)+(regRaw['両方利用'][r]||0);
+});
+
+const c5 = echarts.init(document.getElementById('chartRegion'));
+c5.setOption({
+  tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+  legend:{data:fiveViews,textStyle:{color:'#94a3b8',fontSize:8},top:0,type:'scroll'},
+  grid:{left:10,right:10,top:25,bottom:5,containLabel:true},
+  xAxis:{type:'category',data:regions,axisLabel:{color:'#94a3b8',fontSize:8,rotate:20}},
+  yAxis:{type:'value',axisLabel:{formatter:'{value}%',color:'#94a3b8',fontSize:8},splitLine:{lineStyle:{color:'#334155'}}},
+  series: fiveViews.map((v,vi) => ({
+    name:v,type:'bar',barGap:'5%',
+    data:regions.map(r => +((regRaw[v][r]||0)/indTotals[v]*100).toFixed(1)),
+    itemStyle:{color:fiveColors[vi]}
+  }))
+});
+
+// --- 契約開始年 ---
+const c6 = echarts.init(document.getElementById('chartYear'));
+const yrRaw = {
+  '新卒利用':{2024:74,2025:551,2026:176},
+  '中途利用':{2024:31,2025:163,2026:42},
+  '両方利用':{2024:32,2025:247,2026:62},
+  '新卒(両方込)':{2024:106,2025:798,2026:238},
+  '中途(両方込)':{2024:63,2025:410,2026:104}
+};
+const years = ['2024','2025','2026'];
+c6.setOption({
+  tooltip:{trigger:'axis'},
+  legend:{data:fiveViews,textStyle:{color:'#94a3b8',fontSize:9},top:0},
+  grid:{left:50,right:20,top:30,bottom:25},
+  xAxis:{type:'category',data:years,axisLabel:{color:'#94a3b8'}},
+  yAxis:{type:'value',axisLabel:{color:'#94a3b8',fontSize:9},splitLine:{lineStyle:{color:'#334155'}}},
+  series: fiveViews.map((v,vi) => ({
+    name:v,type:'bar',barGap:'5%',
+    data:years.map(y => yrRaw[v][y]||0),
+    itemStyle:{color:fiveColors[vi]},
+    label:{show:true,position:'top',fontSize:9,color:'#94a3b8'}
+  }))
+});
+
+window.addEventListener('resize',()=>[c1,c2,c3,c4,c5,c6].forEach(c=>c.resize()));
+</script>
+</body>
+</html>

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>マイナビ2027 - 網羅的分析レポート v5</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+  .card{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.1);padding:24px;margin-bottom:20px}
+  .sc{color:#fff;border-radius:12px;padding:20px}
+  .sc1{background:linear-gradient(135deg,#667eea,#764ba2)}.sc2{background:linear-gradient(135deg,#11998e,#38ef7d)}
+  .sc3{background:linear-gradient(135deg,#f093fb,#f5576c)}.sc4{background:linear-gradient(135deg,#4facfe,#00f2fe)}
+  .insight{background:#FFF7ED;border-left:4px solid #F97316;padding:14px;border-radius:0 8px 8px 0;margin:10px 0;font-size:.88rem}
+  .insight-good{background:#F0FDF4;border-left-color:#22C55E}.insight-bad{background:#FEF2F2;border-left-color:#EF4444}
+  .st{font-size:1.4rem;font-weight:700;margin-bottom:14px;padding-bottom:8px;border-bottom:3px solid #4F46E5}
+  table.dt{width:100%;border-collapse:collapse;font-size:.8rem}
+  table.dt th{background:#F8FAFC;padding:7px 5px;text-align:left;font-weight:600;border-bottom:2px solid #E2E8F0;white-space:nowrap}
+  table.dt td{padding:6px 5px;border-bottom:1px solid #F1F5F9}table.dt tr:hover{background:#F8FAFC}
+  .b{display:inline-block;padding:2px 7px;border-radius:12px;font-size:.7rem;font-weight:600}
+  .bh{background:#DCFCE7;color:#166534}.bm{background:#FEF9C3;color:#854D0E}.bl{background:#FEE2E2;color:#991B1B}
+</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+<div class="max-w-7xl mx-auto px-4 py-8">
+
+  <div class="text-center mb-10">
+    <h1 class="text-3xl font-extrabold text-gray-900">📊 マイナビ2027掲載企業 網羅的分析レポート</h1>
+    <p class="text-gray-500 mt-2">全31,224社 ｜ BCEX業種ベース ｜ ハウスリスト構造比較分析付き</p>
+    <p class="text-xs text-gray-400 mt-1">2026/3/2 ｜ ヨミ = ヨミ + 受注 + チャーン</p>
+  </div>
+
+  <!-- KPI -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div class="sc sc1"><div class="text-sm opacity-80">総企業数</div><div class="text-3xl font-bold">31,224</div></div>
+    <div class="sc sc2"><div class="text-sm opacity-80">ハウスリスト率</div><div class="text-3xl font-bold">86.6%</div><div class="text-xs opacity-70 mt-1">27,030社</div></div>
+    <div class="sc sc3"><div class="text-sm opacity-80">商談実施企業</div><div class="text-3xl font-bold">4,311</div></div>
+    <div class="sc sc4"><div class="text-sm opacity-80">全体ヨミ化率</div><div class="text-3xl font-bold">53.3%</div><div class="text-xs opacity-70 mt-1">2,297 / 4,311</div></div>
+  </div>
+
+  <!-- ===== S1 ハウスリスト ===== -->
+  <div class="card">
+    <h2 class="st">📋 1. ハウスリスト構成</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <table class="dt">
+        <thead><tr><th>区分</th><th class="text-right">件数</th><th class="text-right">構成比</th><th>備考</th></tr></thead>
+        <tbody>
+          <tr><td class="font-bold text-blue-600">テレアポリスト</td><td class="text-right font-bold">18,860</td><td class="text-right">60.4%</td><td class="text-xs text-gray-500">最大母集団</td></tr>
+          <tr><td class="font-bold text-green-600">リード</td><td class="text-right font-bold">3,862</td><td class="text-right">12.4%</td><td class="text-xs text-gray-500">新規テレアポ含む</td></tr>
+          <tr><td class="font-bold text-amber-600">リサイクル</td><td class="text-right font-bold">3,455</td><td class="text-right">11.1%</td><td class="text-xs text-gray-500">ステージ≠受注</td></tr>
+          <tr><td class="font-bold text-purple-600">受注（リサイクル）</td><td class="text-right font-bold">852</td><td class="text-right">2.7%</td><td class="text-xs text-gray-500">リサイクル&ステージ=受注</td></tr>
+          <tr><td class="font-bold text-gray-500">空欄</td><td class="text-right font-bold">4,194</td><td class="text-right">13.4%</td><td class="text-xs text-gray-500">未分類</td></tr>
+        </tbody>
+      </table>
+      <div id="c-hl" style="height:300px"></div>
+    </div>
+  </div>
+
+  <!-- ===== S2 HL別 採用実績・従業員規模 ===== -->
+  <div class="card">
+    <h2 class="st">🔍 2. ハウスリスト別 採用実績・従業員規模の構造比較</h2>
+    <div class="insight insight-good">
+      <strong>🔑 核心的発見:</strong> テレアポリストは小規模採用(中央値5名)・小規模企業(100名以下45%)中心。リード/リサイクルは中〜大規模(中央値11〜19名)。<strong>リストの種別＝企業規模フィルター。</strong>
+    </div>
+
+    <!-- 最大採用実績 箱ひげ -->
+    <h3 class="font-bold text-lg mt-6 mb-2">📈 最大採用実績の分布（Q1〜中央値〜Q3）</h3>
+    <div class="bg-gray-50 rounded-lg p-4">
+      <div id="box-max" style="height:260px"></div>
+    </div>
+    <table class="dt mt-3" style="max-width:700px">
+      <thead><tr><th>ハウスリスト</th><th class="text-right">件数</th><th class="text-right">Q1</th><th class="text-right font-bold">中央値</th><th class="text-right">Q3</th></tr></thead>
+      <tbody>
+        <tr class="bg-blue-50"><td class="font-bold text-blue-600">テレアポリスト</td><td class="text-right">16,907</td><td class="text-right">3</td><td class="text-right font-bold">5</td><td class="text-right">9</td></tr>
+        <tr class="bg-green-50"><td class="font-bold text-green-600">リード</td><td class="text-right">3,686</td><td class="text-right">6</td><td class="text-right font-bold">11</td><td class="text-right">25</td></tr>
+        <tr class="bg-amber-50"><td class="font-bold text-amber-600">リサイクル</td><td class="text-right">3,357</td><td class="text-right">7</td><td class="text-right font-bold">13</td><td class="text-right">29</td></tr>
+        <tr class="bg-purple-50"><td class="font-bold text-purple-600">受注（リサイクル）</td><td class="text-right">828</td><td class="text-right">10</td><td class="text-right font-bold">19</td><td class="text-right">38</td></tr>
+        <tr><td class="font-bold text-gray-500">空欄</td><td class="text-right">3,714</td><td class="text-right">3</td><td class="text-right font-bold">5</td><td class="text-right">11</td></tr>
+      </tbody>
+    </table>
+
+    <!-- 平均採用実績 箱ひげ -->
+    <h3 class="font-bold text-lg mt-8 mb-2">📈 平均採用実績の分布（Q1〜中央値〜Q3）</h3>
+    <div class="bg-gray-50 rounded-lg p-4">
+      <div id="box-avg" style="height:260px"></div>
+    </div>
+    <table class="dt mt-3" style="max-width:700px">
+      <thead><tr><th>ハウスリスト</th><th class="text-right">件数</th><th class="text-right">Q1</th><th class="text-right font-bold">中央値</th><th class="text-right">Q3</th></tr></thead>
+      <tbody>
+        <tr class="bg-blue-50"><td class="font-bold text-blue-600">テレアポリスト</td><td class="text-right">17,762</td><td class="text-right">1</td><td class="text-right font-bold">3</td><td class="text-right">7</td></tr>
+        <tr class="bg-green-50"><td class="font-bold text-green-600">リード</td><td class="text-right">3,735</td><td class="text-right">4</td><td class="text-right font-bold">8</td><td class="text-right">20</td></tr>
+        <tr class="bg-amber-50"><td class="font-bold text-amber-600">リサイクル</td><td class="text-right">4,207</td><td class="text-right">5</td><td class="text-right font-bold">10</td><td class="text-right">23</td></tr>
+        <tr class="bg-purple-50"><td class="font-bold text-purple-600">受注（リサイクル）</td><td class="text-right">828</td><td class="text-right">7</td><td class="text-right font-bold">15</td><td class="text-right">30</td></tr>
+        <tr><td class="font-bold text-gray-500">空欄</td><td class="text-right">3,888</td><td class="text-right">2</td><td class="text-right font-bold">4</td><td class="text-right">8</td></tr>
+      </tbody>
+    </table>
+
+    <!-- 従業員規模 -->
+    <h3 class="font-bold text-lg mt-8 mb-2">🏢 従業員規模の構成比（%）</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <table class="dt">
+        <thead><tr><th>ハウスリスト</th><th class="text-right">100名以下</th><th class="text-right">101-300</th><th class="text-right">301-1000</th><th class="text-right">1001名+</th></tr></thead>
+        <tbody>
+          <tr class="bg-blue-50"><td class="font-bold text-blue-600">テレアポリスト</td><td class="text-right font-bold">45.2%</td><td class="text-right">31.6%</td><td class="text-right">15.2%</td><td class="text-right">5.5%</td></tr>
+          <tr class="bg-green-50"><td class="font-bold text-green-600">リード</td><td class="text-right">16.2%</td><td class="text-right">30.9%</td><td class="text-right font-bold">30.8%</td><td class="text-right">19.4%</td></tr>
+          <tr class="bg-amber-50"><td class="font-bold text-amber-600">リサイクル</td><td class="text-right">13.2%</td><td class="text-right">30.5%</td><td class="text-right font-bold">31.7%</td><td class="text-right">21.6%</td></tr>
+          <tr class="bg-purple-50"><td class="font-bold text-purple-600">受注（リサイクル）</td><td class="text-right">13.6%</td><td class="text-right">28.8%</td><td class="text-right font-bold">35.4%</td><td class="text-right">20.7%</td></tr>
+          <tr><td class="font-bold text-gray-500">空欄</td><td class="text-right font-bold">48.3%</td><td class="text-right">27.1%</td><td class="text-right">15.9%</td><td class="text-right">7.3%</td></tr>
+        </tbody>
+      </table>
+      <div id="c-hl-emp" style="height:300px"></div>
+    </div>
+
+    <!-- 採用実績帯 -->
+    <h3 class="font-bold text-lg mt-8 mb-2">👥 採用実績帯の構成比（%）</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <table class="dt">
+        <thead><tr><th>ハウスリスト</th><th class="text-right">1-5名</th><th class="text-right">6-10名</th><th class="text-right">11-20名</th><th class="text-right">21-50名</th><th class="text-right">51名+</th></tr></thead>
+        <tbody>
+          <tr class="bg-blue-50"><td class="font-bold text-blue-600">テレアポリスト</td><td class="text-right font-bold">56.7%</td><td class="text-right">21.7%</td><td class="text-right">11.8%</td><td class="text-right">6.3%</td><td class="text-right">3.5%</td></tr>
+          <tr class="bg-green-50"><td class="font-bold text-green-600">リード</td><td class="text-right">23.4%</td><td class="text-right font-bold">24.4%</td><td class="text-right">22.5%</td><td class="text-right">16.6%</td><td class="text-right">13.2%</td></tr>
+          <tr class="bg-amber-50"><td class="font-bold text-amber-600">リサイクル</td><td class="text-right">17.5%</td><td class="text-right">24.2%</td><td class="text-right font-bold">23.9%</td><td class="text-right">20.2%</td><td class="text-right">14.2%</td></tr>
+          <tr class="bg-purple-50"><td class="font-bold text-purple-600">受注（リサイクル）</td><td class="text-right">10.5%</td><td class="text-right">18.7%</td><td class="text-right">24.5%</td><td class="text-right font-bold">29.0%</td><td class="text-right">17.3%</td></tr>
+          <tr><td class="font-bold text-gray-500">空欄</td><td class="text-right font-bold">51.2%</td><td class="text-right">21.9%</td><td class="text-right">13.5%</td><td class="text-right">8.7%</td><td class="text-right">4.8%</td></tr>
+        </tbody>
+      </table>
+      <div id="c-hl-hire" style="height:300px"></div>
+    </div>
+  </div>
+
+  <!-- ===== S3 逆引き ===== -->
+  <div class="card">
+    <h2 class="st">🔄 3. 属性別ハウスリスト所属割合（逆引き）</h2>
+    <div class="insight">
+      <strong>💡</strong> 「採用51名+のうち、テレアポは31.3%のみ。約7割は既接点」→ <strong>大量採用テレアポ企業≒約580社。希少＆高価値。</strong>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+      <div><h4 class="font-bold mb-2">採用実績帯別</h4><div id="c-hire-hl" style="height:380px"></div></div>
+      <div><h4 class="font-bold mb-2">従業員規模別</h4><div id="c-emp-hl" style="height:380px"></div></div>
+    </div>
+  </div>
+
+  <!-- ===== S4 商談結果 ===== -->
+  <div class="card">
+    <h2 class="st">🎯 4. 商談結果サマリ</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <table class="dt">
+        <thead><tr><th>結果</th><th class="text-right">件数</th><th class="text-right">構成比</th><th>ヨミ扱い</th></tr></thead>
+        <tbody>
+          <tr><td>未ヨミ</td><td class="text-right font-bold">1,832</td><td class="text-right">42.5%</td><td><span class="b bl">非ヨミ</span></td></tr>
+          <tr><td>ヨミ</td><td class="text-right font-bold">1,230</td><td class="text-right">28.5%</td><td><span class="b bh">ヨミ</span></td></tr>
+          <tr><td>受注</td><td class="text-right font-bold">833</td><td class="text-right">19.3%</td><td><span class="b bh">ヨミ</span></td></tr>
+          <tr><td>チャーン</td><td class="text-right font-bold">234</td><td class="text-right">5.4%</td><td><span class="b bh">ヨミ</span></td></tr>
+          <tr><td>未決着</td><td class="text-right font-bold">182</td><td class="text-right">4.2%</td><td><span class="b bm">保留</span></td></tr>
+          <tr class="bg-green-50 font-bold"><td>ヨミ計</td><td class="text-right text-green-700">2,297</td><td class="text-right text-green-700">53.3%</td><td></td></tr>
+        </tbody>
+      </table>
+      <div id="c-result" style="height:260px"></div>
+    </div>
+  </div>
+
+  <!-- ===== S5 採用実績別ヨミ化率 ===== -->
+  <div class="card">
+    <h2 class="st">👥 5. 採用実績別ヨミ化率（細分化）</h2>
+    <div class="insight insight-good">
+      <strong>🔑 採用6名が分水嶺。31-50名がピーク(64.1%)。</strong> 1-5名は43%台 → 6名超で49% → 16名超で55%超 → 31-50名で64.1%。51名+ではやや低下(59.4%)。
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <table class="dt">
+        <thead><tr><th>採用実績</th><th class="text-right">商談</th><th class="text-right">ヨミ計</th><th class="text-right">ヨミ化率</th><th class="text-right">受注率</th></tr></thead>
+        <tbody>
+          <tr><td>1名</td><td class="text-right">51</td><td class="text-right">23</td><td class="text-right"><span class="b bm">45.1%</span></td><td class="text-right">11.8%</td></tr>
+          <tr><td>2-3名</td><td class="text-right">242</td><td class="text-right">105</td><td class="text-right"><span class="b bm">43.4%</span></td><td class="text-right">12.0%</td></tr>
+          <tr><td>4-5名</td><td class="text-right">382</td><td class="text-right">166</td><td class="text-right"><span class="b bm">43.5%</span></td><td class="text-right">13.1%</td></tr>
+          <tr><td>6-10名</td><td class="text-right">967</td><td class="text-right">474</td><td class="text-right"><span class="b bm">49.0%</span></td><td class="text-right">15.6%</td></tr>
+          <tr><td>11-15名</td><td class="text-right">622</td><td class="text-right">321</td><td class="text-right"><span class="b bh">51.6%</span></td><td class="text-right">18.2%</td></tr>
+          <tr class="bg-green-50"><td><strong>16-20名</strong></td><td class="text-right">385</td><td class="text-right">213</td><td class="text-right"><span class="b bh">55.3%</span></td><td class="text-right">22.6%</td></tr>
+          <tr class="bg-green-50"><td><strong>21-30名</strong></td><td class="text-right">484</td><td class="text-right">283</td><td class="text-right"><span class="b bh">58.5%</span></td><td class="text-right">24.8%</td></tr>
+          <tr class="bg-green-100"><td><strong>31-50名 ★</strong></td><td class="text-right font-bold">435</td><td class="text-right">279</td><td class="text-right"><span class="b bh"><strong>64.1%</strong></span></td><td class="text-right font-bold">26.2%</td></tr>
+          <tr class="bg-green-50"><td><strong>51名以上</strong></td><td class="text-right">621</td><td class="text-right">369</td><td class="text-right"><span class="b bh">59.4%</span></td><td class="text-right">22.4%</td></tr>
+        </tbody>
+      </table>
+      <div id="c-hire-yomi" style="height:360px"></div>
+    </div>
+  </div>
+
+  <!-- ===== S6 従業員規模別ヨミ化率 ===== -->
+  <div class="card">
+    <h2 class="st">🏢 6. 従業員規模別ヨミ化率</h2>
+    <div class="insight insight-good"><strong>501〜1000名が最高57.7%。</strong>不明のみ29.9%と極端に低い。その他は51〜58%で安定。</div>
+    <div id="c-emp-yomi" style="height:340px"></div>
+  </div>
+
+  <!-- ===== S7 BCEX業種別 ===== -->
+  <div class="card">
+    <h2 class="st">🏭 7. BCEX業種別ヨミ化率</h2>
+    <div class="insight insight-good"><strong>🟢 TOP:</strong> 人材(71.0%) / 外食(70.5%) / 広告(69.5%) / IT(65.8%) / エンタメ(60.7%)</div>
+    <div class="insight insight-bad"><strong>🔴 WORST:</strong> 電気製品(27.6%) / 金融(35.8%) / 製造(39.6%) / マスコミ(41.5%) / 自動車(44.8%)</div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+      <table class="dt">
+        <thead><tr><th>#</th><th>BCEX業種</th><th class="text-right">商談</th><th class="text-right">ヨミ化率</th><th class="text-right">受注率</th></tr></thead>
+        <tbody id="bcex-tbody"></tbody>
+      </table>
+      <div id="c-bcex" style="height:700px"></div>
+    </div>
+  </div>
+
+  <!-- ===== S8 クロス: BCEX業種×採用実績 ===== -->
+  <div class="card">
+    <h2 class="st">🔬 8. BCEX業種 × 採用実績 ヒートマップ</h2>
+    <div class="insight insight-good">
+      <strong>🎯 ゴールデン:</strong> 外食×51名+(94.1%) / 広告×21-50名(90.0%) / IT×21-50名(77.5%)<br>
+      <strong>⚠️ 要注意:</strong> 製造×1-5名(19.2%) / 金融×6-10名(19.5%) / 食品×1-5名(24.0%)
+    </div>
+    <div id="c-cross1" style="height:560px;margin-top:16px"></div>
+  </div>
+
+  <!-- ===== S9 NEW: 従業員規模×採用実績 ===== -->
+  <div class="card">
+    <h2 class="st">🔬 9. 従業員規模 × 採用実績 ヒートマップ</h2>
+    <div class="insight insight-good">
+      <strong>🎯 ホットスポット:</strong> 51-100名×51名+(100%) / ~50名×21-50名(81.3%) / 301-500名×51名+(73.5%) / 101-300名×21-50名(73.4%)
+    </div>
+    <div id="c-cross2" style="height:440px;margin-top:16px"></div>
+  </div>
+
+  <!-- ===== S10 NEW: 従業員規模×BCEX業種 ===== -->
+  <div class="card">
+    <h2 class="st">🔬 10. 従業員規模 × BCEX業種 ヒートマップ</h2>
+    <div class="insight insight-good">
+      <strong>🎯 ホットスポット:</strong> 501-1K×広告(100%) / 2K-3K×人材(83.3%) / 501-1K×エンタメ(83.3%) / 2K-3K×IT(81.3%)
+    </div>
+    <div class="insight insight-bad">
+      <strong>⚠️ コールドスポット:</strong> ~50名×金融(0%) / ~50名×化学(0%) / 5K~×機械(0%) / 空欄×金融(20.6%)
+    </div>
+    <div id="c-cross3" style="height:560px;margin-top:16px"></div>
+  </div>
+
+  <!-- ===== S11 提言 ===== -->
+  <div class="card" style="background:linear-gradient(135deg,#EEF2FF,#FDF2F8)">
+    <h2 class="st" style="border-bottom-color:#7C3AED">💎 11. 総合提言</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-white rounded-xl p-5 shadow-sm">
+        <div class="text-4xl mb-2">🏆</div>
+        <h4 class="font-bold text-lg text-purple-700">Tier 1: 最優先</h4>
+        <ul class="mt-3 space-y-2 text-sm">
+          <li>✅ <strong>業種:</strong> 人材、外食、広告、IT</li>
+          <li>✅ <strong>採用:</strong> 31〜50名</li>
+          <li>✅ <strong>従業員:</strong> 501〜1,000名</li>
+          <li class="text-purple-700 font-bold">→ ヨミ化率 64〜100%</li>
+        </ul>
+      </div>
+      <div class="bg-white rounded-xl p-5 shadow-sm">
+        <div class="text-4xl mb-2">🥈</div>
+        <h4 class="font-bold text-lg text-blue-700">Tier 2: 有望</h4>
+        <ul class="mt-3 space-y-2 text-sm">
+          <li>✅ <strong>業種:</strong> エンタメ、不動産、コンサル、教育、住宅</li>
+          <li>✅ <strong>採用:</strong> 16〜30名</li>
+          <li>✅ <strong>従業員:</strong> 2,001〜3,000名</li>
+          <li class="text-blue-700 font-bold">→ ヨミ化率 55〜68%</li>
+        </ul>
+      </div>
+      <div class="bg-white rounded-xl p-5 shadow-sm">
+        <div class="text-4xl mb-2">⚠️</div>
+        <h4 class="font-bold text-lg text-red-700">避けるべき</h4>
+        <ul class="mt-3 space-y-2 text-sm">
+          <li>❌ <strong>業種:</strong> 金融、電気製品、製造、マスコミ</li>
+          <li>❌ <strong>採用:</strong> 1〜5名</li>
+          <li>❌ <strong>従業員:</strong> 不明企業</li>
+          <li class="text-red-700 font-bold">→ ヨミ化率 19〜44%</li>
+        </ul>
+      </div>
+    </div>
+    <div class="mt-6 bg-white rounded-xl p-5 shadow-sm">
+      <h4 class="font-bold text-lg mb-3">📐 最重要インサイト</h4>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div>
+          <p class="font-bold text-indigo-700 mb-1">1. ハウスリスト＝企業規模フィルター</p>
+          <p>テレアポ(中央値5名) vs 受注リサイクル(中央値19名)。<strong>テレアポ内の採用16名+企業(約3,600社)が未開拓高ポテンシャル。</strong></p>
+        </div>
+        <div>
+          <p class="font-bold text-indigo-700 mb-1">2. 従業員×採用実績の二軸で精度UP</p>
+          <p>301-500名×51名+が<strong>73.5%</strong>、101-300名×21-50名が<strong>73.4%</strong>。<strong>単軸より二軸の方が予測精度が高い。</strong></p>
+        </div>
+        <div>
+          <p class="font-bold text-indigo-700 mb-1">3. 広告業種は受注率が全業種最高</p>
+          <p>ヨミ化率69.5%+受注率33.9%。501-1K規模で<strong>100%</strong>。</p>
+        </div>
+        <div>
+          <p class="font-bold text-indigo-700 mb-1">4. 金融は構造的にヨミ化困難</p>
+          <p>ヨミ化率35.8%。空欄企業の金融63社は<strong>20.6%</strong>で最低。規模問わず低調。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== UTILITIES ==========
+const $ = id => document.getElementById(id);
+const EC = id => echarts.init($(id));
+
+// ========== DATA ==========
+// 箱ひげデータ（空欄は最下段）
+const boxLabels = ['テレアポリスト','リード','リサイクル','受注(リサイクル)','空欄'];
+const maxQ = {q1:[3,6,7,10,3], med:[5,11,13,19,5], q3:[9,25,29,38,11]};
+const avgQ = {q1:[1,4,5,7,2], med:[3,8,10,15,4], q3:[7,20,23,30,8]};
+
+// BCEX業種データ
+const bcexData = [
+  {n:'人材',t:124,r:71.0,w:28.2},{n:'外食',t:88,r:70.5,w:29.6},{n:'広告',t:118,r:69.5,w:33.9},
+  {n:'IT',t:503,r:65.8,w:25.2},{n:'エンタメ',t:84,r:60.7,w:28.6},{n:'不動産業界',t:181,r:60.2,w:24.9},
+  {n:'ゲーム',t:25,r:60.0,w:12.0},{n:'コンサルティング',t:137,r:58.4,w:19.0},{n:'教育',t:57,r:57.9,w:19.3},
+  {n:'住宅',t:97,r:55.7,w:26.8},{n:'専門サービス',t:54,r:55.6,w:18.5},{n:'その他サービス',t:139,r:55.4,w:18.7},
+  {n:'商社',t:410,r:53.4,w:17.3},{n:'建設・工事',t:287,r:53.3,w:23.0},{n:'電子部品',t:84,r:51.2,w:13.1},
+  {n:'小売',t:350,r:50.6,w:20.0},{n:'機械関連サービス',t:86,r:50.0,w:23.3},{n:'化学',t:130,r:48.5,w:13.1},
+  {n:'運輸・物流',t:153,r:48.4,w:12.4},{n:'医療・福祉',t:212,r:47.2,w:17.5},{n:'機械業界',t:135,r:45.2,w:15.6},
+  {n:'食品',t:145,r:44.8,w:15.2},{n:'自動車・乗り物',t:105,r:44.8,w:11.4},{n:'マスコミ',t:53,r:41.5,w:7.5},
+  {n:'製造',t:106,r:39.6,w:14.2},{n:'金融',t:240,r:35.8,w:10.4},{n:'電気製品',t:29,r:27.6,w:10.3}
+];
+
+// ヒートマップ1: BCEX業種×採用実績
+const ind1 = ['IT','人材','外食','広告','エンタメ','不動産業界','コンサルティング','住宅','その他サービス','商社','建設・工事','小売','化学','運輸・物流','医療・福祉','機械業界','食品','自動車・乗り物','製造','金融'];
+const hire1 = ['1-5名','6-10名','11-20名','21-50名','51名+'];
+const hm1 = [
+  [0,0,56.9,51],[0,1,55.9,93],[0,2,62.3,122],[0,3,77.5,120],[0,4,72.4,105],
+  [1,0,61.9,21],[1,1,72.7,22],[1,2,69.2,26],[1,3,69.2,26],[1,4,74.4,25],
+  [2,1,44.4,9],[2,2,76.2,21],[2,3,66.7,24],[2,4,94.1,34],
+  [3,0,52.0,25],[3,1,74.1,27],[3,2,67.9,28],[3,3,90.0,20],[3,4,58.3,12],
+  [4,0,56.3,16],[4,1,60.0,15],[4,2,61.1,18],[4,3,64.3,14],[4,4,71.4,21],
+  [5,0,41.4,29],[5,1,58.5,41],[5,2,68.3,41],[5,3,65.9,44],[5,4,60.0,20],
+  [6,0,64.0,25],[6,1,52.6,19],[6,2,48.0,25],[6,3,69.0,29],[6,4,62.5,32],
+  [7,0,43.8,16],[7,1,41.7,12],[7,2,59.1,22],[7,3,66.7,24],[7,4,68.8,16],
+  [8,0,35.3,17],[8,1,55.0,20],[8,2,59.5,37],[8,3,50.0,26],[8,4,62.1,29],
+  [9,0,44.7,85],[9,1,52.4,103],[9,2,55.0,111],[9,3,56.8,74],[9,4,69.7,33],
+  [10,0,50.0,66],[10,1,46.4,56],[10,2,57.4,94],[10,3,66.7,42],[10,4,44.0,25],
+  [11,0,48.8,82],[11,1,38.7,75],[11,2,41.3,75],[11,3,55.4,74],[11,4,67.1,43],
+  [12,0,36.4,22],[12,1,40.0,35],[12,2,54.8,42],[12,3,55.6,18],
+  [13,0,50.0,18],[13,1,44.4,27],[13,2,53.7,41],[13,3,42.9,28],[13,4,46.7,30],
+  [14,0,24.1,29],[14,1,61.5,39],[14,2,42.9,49],[14,3,52.7,55],[14,4,47.6,42],
+  [15,0,30.0,20],[15,1,37.5,24],[15,2,56.1,41],[15,3,50.0,26],[15,4,37.5,16],
+  [16,0,24.0,25],[16,1,44.2,43],[16,2,50.0,34],[16,3,51.5,33],
+  [17,0,26.7,15],[17,1,36.4,22],[17,2,50.0,22],[17,3,47.8,23],[17,4,70.0,20],
+  [18,0,19.2,26],[18,1,50.0,16],[18,2,42.1,19],[18,3,38.9,18],
+  [19,0,35.5,31],[19,1,19.5,41],[19,2,28.9,45],[19,3,49.2,63],[19,4,38.9,54]
+];
+
+// ヒートマップ2: 従業員規模×採用実績（空欄を最下段に）
+const empL2 = ['~50名','51-100','101-300','301-500','501-1K','1K-2K','2K-3K','3K-5K','5K~','空欄'];
+const hireL2 = ['1-5名','6-10名','11-20名','21-50名','51名+','空欄'];
+const empMap2 = {'~50名':0,'51~100':1,'101~300':2,'301~500':3,'501~1000':4,'1001~2000':5,'2001~3000':6,'3001~5000':7,'5001~':8,'空欄':9};
+const hireMap2 = {'1-5名':0,'6-10名':1,'11-20名':2,'21-50名':3,'51名+':4,'空欄':5};
+const rawHM2 = [
+  {"emp":"~50名","hb":"1-5名","cnt":92,"r":48.9},{"emp":"~50名","hb":"6-10名","cnt":45,"r":55.6},{"emp":"~50名","hb":"11-20名","cnt":26,"r":65.4},{"emp":"~50名","hb":"21-50名","cnt":16,"r":81.3},{"emp":"~50名","hb":"51名+","cnt":6,"r":50.0},{"emp":"~50名","hb":"空欄","cnt":14,"r":64.3},
+  {"emp":"51~100","hb":"1-5名","cnt":150,"r":48.0},{"emp":"51~100","hb":"6-10名","cnt":118,"r":57.6},{"emp":"51~100","hb":"11-20名","cnt":56,"r":67.9},{"emp":"51~100","hb":"21-50名","cnt":28,"r":50.0},{"emp":"51~100","hb":"51名+","cnt":5,"r":100.0},{"emp":"51~100","hb":"空欄","cnt":16,"r":56.3},
+  {"emp":"101~300","hb":"1-5名","cnt":289,"r":38.4},{"emp":"101~300","hb":"6-10名","cnt":458,"r":45.2},{"emp":"101~300","hb":"11-20名","cnt":343,"r":58.0},{"emp":"101~300","hb":"21-50名","cnt":139,"r":73.4},{"emp":"101~300","hb":"51名+","cnt":32,"r":68.8},{"emp":"101~300","hb":"空欄","cnt":40,"r":55.0},
+  {"emp":"301~500","hb":"1-5名","cnt":73,"r":39.7},{"emp":"301~500","hb":"6-10名","cnt":172,"r":46.5},{"emp":"301~500","hb":"11-20名","cnt":241,"r":47.7},{"emp":"301~500","hb":"21-50名","cnt":149,"r":67.1},{"emp":"301~500","hb":"51名+","cnt":34,"r":73.5},{"emp":"301~500","hb":"空欄","cnt":6,"r":50.0},
+  {"emp":"501~1000","hb":"1-5名","cnt":39,"r":59.0},{"emp":"501~1000","hb":"6-10名","cnt":104,"r":57.7},{"emp":"501~1000","hb":"11-20名","cnt":199,"r":49.2},{"emp":"501~1000","hb":"21-50名","cnt":285,"r":60.0},{"emp":"501~1000","hb":"51名+","cnt":87,"r":67.8},{"emp":"501~1000","hb":"空欄","cnt":10,"r":70.0},
+  {"emp":"1001~2000","hb":"1-5名","cnt":16,"r":43.8},{"emp":"1001~2000","hb":"6-10名","cnt":39,"r":59.0},{"emp":"1001~2000","hb":"11-20名","cnt":80,"r":48.8},{"emp":"1001~2000","hb":"21-50名","cnt":170,"r":54.7},{"emp":"1001~2000","hb":"51名+","cnt":127,"r":62.2},{"emp":"1001~2000","hb":"空欄","cnt":9,"r":33.3},
+  {"emp":"2001~3000","hb":"1-5名","cnt":4,"r":100.0},{"emp":"2001~3000","hb":"6-10名","cnt":11,"r":54.5},{"emp":"2001~3000","hb":"11-20名","cnt":16,"r":62.5},{"emp":"2001~3000","hb":"21-50名","cnt":50,"r":52.0},{"emp":"2001~3000","hb":"51名+","cnt":86,"r":58.1},{"emp":"2001~3000","hb":"空欄","cnt":11,"r":45.5},
+  {"emp":"3001~5000","hb":"1-5名","cnt":2,"r":50.0},{"emp":"3001~5000","hb":"6-10名","cnt":4,"r":50.0},{"emp":"3001~5000","hb":"11-20名","cnt":10,"r":60.0},{"emp":"3001~5000","hb":"21-50名","cnt":35,"r":60.0},{"emp":"3001~5000","hb":"51名+","cnt":95,"r":53.7},{"emp":"3001~5000","hb":"空欄","cnt":3,"r":66.7},
+  {"emp":"5001~","hb":"1-5名","cnt":1,"r":0.0},{"emp":"5001~","hb":"11-20名","cnt":6,"r":66.7},{"emp":"5001~","hb":"21-50名","cnt":12,"r":58.3},{"emp":"5001~","hb":"51名+","cnt":129,"r":55.0},{"emp":"5001~","hb":"空欄","cnt":6,"r":16.7},
+  {"emp":"空欄","hb":"1-5名","cnt":9,"r":22.2},{"emp":"空欄","hb":"6-10名","cnt":16,"r":18.8},{"emp":"空欄","hb":"11-20名","cnt":30,"r":26.7},{"emp":"空欄","hb":"21-50名","cnt":35,"r":42.9},{"emp":"空欄","hb":"51名+","cnt":20,"r":20.0},{"emp":"空欄","hb":"空欄","cnt":7,"r":42.9}
+];
+const hm2 = rawHM2.map(d => [empMap2[d.emp], hireMap2[d.hb], d.r, d.cnt]);
+
+// ヒートマップ3: 従業員規模×BCEX業種（空欄を最下段に）
+const empL3 = ['~50名','51-100','101-300','301-500','501-1K','1K-2K','2K-3K','3K-5K','5K~','空欄'];
+const indL3 = ['IT','人材','外食','広告','エンタメ','不動産業界','コンサルティング','住宅','商社','建設・工事','小売','化学','運輸・物流','医療・福祉','機械業界','食品','自動車・乗り物','製造','マスコミ','金融'];
+const empMap3 = {'~50名':0,'51~100':1,'101~300':2,'301~500':3,'501~1000':4,'1001~2000':5,'2001~3000':6,'3001~5000':7,'5001~':8,'空欄':9};
+const rawHM3 = [
+  {"e":"~50名","i":"IT","c":27,"r":70.4},{"e":"~50名","i":"人材","c":8,"r":75.0},{"e":"~50名","i":"外食","c":3,"r":100.0},{"e":"~50名","i":"広告","c":20,"r":70.0},{"e":"~50名","i":"エンタメ","c":3,"r":0.0},{"e":"~50名","i":"不動産業界","c":24,"r":50.0},{"e":"~50名","i":"コンサルティング","c":17,"r":58.8},{"e":"~50名","i":"商社","c":15,"r":46.7},{"e":"~50名","i":"建設・工事","c":19,"r":57.9},{"e":"~50名","i":"小売","c":8,"r":62.5},{"e":"~50名","i":"化学","c":3,"r":0.0},{"e":"~50名","i":"運輸・物流","c":4,"r":25.0},{"e":"~50名","i":"医療・福祉","c":3,"r":33.3},{"e":"~50名","i":"食品","c":6,"r":33.3},{"e":"~50名","i":"マスコミ","c":4,"r":25.0},{"e":"~50名","i":"金融","c":3,"r":0.0},
+  {"e":"51~100","i":"IT","c":48,"r":54.2},{"e":"51~100","i":"人材","c":13,"r":69.2},{"e":"51~100","i":"外食","c":4,"r":50.0},{"e":"51~100","i":"広告","c":17,"r":70.6},{"e":"51~100","i":"エンタメ","c":10,"r":70.0},{"e":"51~100","i":"不動産業界","c":41,"r":61.0},{"e":"51~100","i":"コンサルティング","c":19,"r":68.4},{"e":"51~100","i":"住宅","c":19,"r":52.6},{"e":"51~100","i":"商社","c":49,"r":51.0},{"e":"51~100","i":"建設・工事","c":38,"r":57.9},{"e":"51~100","i":"小売","c":18,"r":61.1},{"e":"51~100","i":"化学","c":4,"r":25.0},{"e":"51~100","i":"運輸・物流","c":9,"r":33.3},{"e":"51~100","i":"医療・福祉","c":9,"r":44.4},{"e":"51~100","i":"機械業界","c":8,"r":50.0},{"e":"51~100","i":"食品","c":11,"r":27.3},{"e":"51~100","i":"自動車・乗り物","c":4,"r":25.0},{"e":"51~100","i":"製造","c":8,"r":50.0},{"e":"51~100","i":"マスコミ","c":4,"r":75.0},{"e":"51~100","i":"金融","c":10,"r":50.0},
+  {"e":"101~300","i":"IT","c":188,"r":61.2},{"e":"101~300","i":"人材","c":22,"r":72.7},{"e":"101~300","i":"外食","c":15,"r":66.7},{"e":"101~300","i":"広告","c":53,"r":64.2},{"e":"101~300","i":"エンタメ","c":25,"r":52.0},{"e":"101~300","i":"不動産業界","c":65,"r":70.8},{"e":"101~300","i":"コンサルティング","c":37,"r":59.5},{"e":"101~300","i":"住宅","c":36,"r":58.3},{"e":"101~300","i":"商社","c":164,"r":50.6},{"e":"101~300","i":"建設・工事","c":105,"r":47.6},{"e":"101~300","i":"小売","c":85,"r":41.2},{"e":"101~300","i":"化学","c":30,"r":50.0},{"e":"101~300","i":"運輸・物流","c":30,"r":46.7},{"e":"101~300","i":"医療・福祉","c":47,"r":42.6},{"e":"101~300","i":"機械業界","c":38,"r":36.8},{"e":"101~300","i":"食品","c":49,"r":46.9},{"e":"101~300","i":"自動車・乗り物","c":9,"r":44.4},{"e":"101~300","i":"製造","c":37,"r":27.0},{"e":"101~300","i":"マスコミ","c":19,"r":31.6},{"e":"101~300","i":"金融","c":49,"r":36.7},
+  {"e":"301~500","i":"IT","c":93,"r":71.0},{"e":"301~500","i":"人材","c":10,"r":50.0},{"e":"301~500","i":"外食","c":19,"r":68.4},{"e":"301~500","i":"広告","c":12,"r":75.0},{"e":"301~500","i":"エンタメ","c":14,"r":71.4},{"e":"301~500","i":"不動産業界","c":16,"r":43.8},{"e":"301~500","i":"コンサルティング","c":22,"r":54.5},{"e":"301~500","i":"住宅","c":15,"r":46.7},{"e":"301~500","i":"商社","c":64,"r":51.6},{"e":"301~500","i":"建設・工事","c":44,"r":56.8},{"e":"301~500","i":"小売","c":52,"r":50.0},{"e":"301~500","i":"化学","c":32,"r":43.8},{"e":"301~500","i":"運輸・物流","c":23,"r":56.5},{"e":"301~500","i":"医療・福祉","c":26,"r":46.2},{"e":"301~500","i":"機械業界","c":20,"r":55.0},{"e":"301~500","i":"食品","c":26,"r":30.8},{"e":"301~500","i":"自動車・乗り物","c":24,"r":16.7},{"e":"301~500","i":"製造","c":20,"r":40.0},{"e":"301~500","i":"マスコミ","c":11,"r":45.5},{"e":"301~500","i":"金融","c":34,"r":41.2},
+  {"e":"501~1000","i":"IT","c":80,"r":73.8},{"e":"501~1000","i":"人材","c":18,"r":77.8},{"e":"501~1000","i":"外食","c":19,"r":78.9},{"e":"501~1000","i":"広告","c":8,"r":100.0},{"e":"501~1000","i":"エンタメ","c":12,"r":83.3},{"e":"501~1000","i":"不動産業界","c":18,"r":77.8},{"e":"501~1000","i":"コンサルティング","c":21,"r":42.9},{"e":"501~1000","i":"住宅","c":10,"r":70.0},{"e":"501~1000","i":"商社","c":62,"r":54.8},{"e":"501~1000","i":"建設・工事","c":42,"r":54.8},{"e":"501~1000","i":"小売","c":66,"r":51.5},{"e":"501~1000","i":"化学","c":31,"r":58.1},{"e":"501~1000","i":"運輸・物流","c":34,"r":50.0},{"e":"501~1000","i":"医療・福祉","c":36,"r":47.2},{"e":"501~1000","i":"機械業界","c":32,"r":37.5},{"e":"501~1000","i":"食品","c":24,"r":54.2},{"e":"501~1000","i":"自動車・乗り物","c":26,"r":53.8},{"e":"501~1000","i":"製造","c":15,"r":46.7},{"e":"501~1000","i":"マスコミ","c":10,"r":50.0},{"e":"501~1000","i":"金融","c":27,"r":37.0},
+  {"e":"1001~2000","i":"IT","c":31,"r":67.7},{"e":"1001~2000","i":"人材","c":12,"r":58.3},{"e":"1001~2000","i":"外食","c":11,"r":63.6},{"e":"1001~2000","i":"エンタメ","c":9,"r":66.7},{"e":"1001~2000","i":"不動産業界","c":7,"r":42.9},{"e":"1001~2000","i":"コンサルティング","c":12,"r":58.3},{"e":"1001~2000","i":"住宅","c":9,"r":66.7},{"e":"1001~2000","i":"商社","c":33,"r":63.6},{"e":"1001~2000","i":"建設・工事","c":24,"r":70.8},{"e":"1001~2000","i":"小売","c":46,"r":54.3},{"e":"1001~2000","i":"化学","c":15,"r":53.3},{"e":"1001~2000","i":"運輸・物流","c":28,"r":42.9},{"e":"1001~2000","i":"医療・福祉","c":29,"r":41.4},{"e":"1001~2000","i":"機械業界","c":21,"r":57.1},{"e":"1001~2000","i":"食品","c":17,"r":58.8},{"e":"1001~2000","i":"自動車・乗り物","c":19,"r":57.9},{"e":"1001~2000","i":"製造","c":15,"r":40.0},{"e":"1001~2000","i":"マスコミ","c":3,"r":33.3},{"e":"1001~2000","i":"金融","c":14,"r":57.1},
+  {"e":"2001~3000","i":"IT","c":16,"r":81.3},{"e":"2001~3000","i":"人材","c":12,"r":83.3},{"e":"2001~3000","i":"外食","c":6,"r":66.7},{"e":"2001~3000","i":"広告","c":3,"r":66.7},{"e":"2001~3000","i":"エンタメ","c":3,"r":33.3},{"e":"2001~3000","i":"住宅","c":3,"r":66.7},{"e":"2001~3000","i":"商社","c":11,"r":54.5},{"e":"2001~3000","i":"建設・工事","c":9,"r":33.3},{"e":"2001~3000","i":"小売","c":21,"r":52.4},{"e":"2001~3000","i":"化学","c":7,"r":42.9},{"e":"2001~3000","i":"運輸・物流","c":8,"r":62.5},{"e":"2001~3000","i":"医療・福祉","c":16,"r":50.0},{"e":"2001~3000","i":"機械業界","c":5,"r":80.0},{"e":"2001~3000","i":"食品","c":6,"r":50.0},{"e":"2001~3000","i":"自動車・乗り物","c":7,"r":42.9},{"e":"2001~3000","i":"製造","c":3,"r":33.3},{"e":"2001~3000","i":"金融","c":16,"r":50.0},
+  {"e":"3001~5000","i":"IT","c":7,"r":42.9},{"e":"3001~5000","i":"人材","c":10,"r":70.0},{"e":"3001~5000","i":"外食","c":0,"r":0},{"e":"3001~5000","i":"エンタメ","c":4,"r":75.0},{"e":"3001~5000","i":"不動産業界","c":5,"r":20.0},{"e":"3001~5000","i":"商社","c":9,"r":77.8},{"e":"3001~5000","i":"建設・工事","c":5,"r":20.0},{"e":"3001~5000","i":"小売","c":19,"r":63.2},{"e":"3001~5000","i":"化学","c":6,"r":50.0},{"e":"3001~5000","i":"運輸・物流","c":8,"r":50.0},{"e":"3001~5000","i":"医療・福祉","c":13,"r":61.5},{"e":"3001~5000","i":"機械業界","c":5,"r":40.0},{"e":"3001~5000","i":"食品","c":3,"r":100.0},{"e":"3001~5000","i":"自動車・乗り物","c":9,"r":66.7},{"e":"3001~5000","i":"製造","c":3,"r":66.7},{"e":"3001~5000","i":"金融","c":14,"r":42.9},
+  {"e":"5001~","i":"IT","c":13,"r":69.2},{"e":"5001~","i":"人材","c":18,"r":72.2},{"e":"5001~","i":"外食","c":9,"r":77.8},{"e":"5001~","i":"エンタメ","c":3,"r":33.3},{"e":"5001~","i":"不動産業界","c":3,"r":33.3},{"e":"5001~","i":"商社","c":3,"r":100.0},{"e":"5001~","i":"小売","c":24,"r":54.2},{"e":"5001~","i":"運輸・物流","c":9,"r":55.6},{"e":"5001~","i":"医療・福祉","c":13,"r":69.2},{"e":"5001~","i":"機械業界","c":4,"r":0.0},{"e":"5001~","i":"自動車・乗り物","c":5,"r":40.0},{"e":"5001~","i":"製造","c":3,"r":66.7},{"e":"5001~","i":"金融","c":10,"r":40.0},
+  {"e":"空欄","i":"コンサルティング","c":4,"r":50.0},{"e":"空欄","i":"医療・福祉","c":20,"r":45.0},{"e":"空欄","i":"小売","c":11,"r":45.5},{"e":"空欄","i":"金融","c":63,"r":20.6}
+];
+const hm3 = rawHM3.filter(d=>d.c>0).map(d => {
+  const ei = empMap3[d.e];
+  const ii = indL3.indexOf(d.i);
+  return ii >= 0 ? [ii, ei, d.r, d.c] : null;
+}).filter(Boolean);
+
+// ========== HL円グラフ ==========
+EC('c-hl').setOption({
+  tooltip:{trigger:'item',formatter:'{b}: {c}社 ({d}%)'},
+  legend:{orient:'vertical',right:5,top:'center',textStyle:{fontSize:10}},
+  series:[{type:'pie',radius:['35%','65%'],center:['38%','50%'],itemStyle:{borderRadius:6,borderColor:'#fff',borderWidth:2},label:{show:false},
+    data:[{value:18860,name:'テレアポリスト',itemStyle:{color:'#4F46E5'}},{value:3862,name:'リード',itemStyle:{color:'#22C55E'}},{value:3455,name:'リサイクル',itemStyle:{color:'#F59E0B'}},{value:852,name:'受注(リサイクル)',itemStyle:{color:'#A855F7'}},{value:4194,name:'空欄',itemStyle:{color:'#94A3B8'}}]}]
+});
+
+// ========== 箱ひげチャート ==========
+function makeBoxChart(elId, data, maxVal, color1, color2) {
+  EC(elId).setOption({
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'},
+      formatter: p => {
+        const idx = p[0]?.dataIndex;
+        if (idx == null) return '';
+        return `<b>${boxLabels[idx]}</b><br>Q1: ${data.q1[idx]}<br>中央値: ${data.med[idx]}<br>Q3: ${data.q3[idx]}`;
+      }},
+    grid:{left:160,right:80,top:10,bottom:10},
+    xAxis:{type:'value',max:maxVal,axisLabel:{formatter:'{value}名'},splitLine:{show:true,lineStyle:{type:'dashed'}}},
+    yAxis:{type:'category',data:boxLabels,axisLabel:{fontSize:11,fontWeight:600},inverse:true},
+    series:[
+      {name:'offset',type:'bar',stack:'box',data:data.q1,itemStyle:{color:'transparent'},barWidth:22,emphasis:{disabled:true}},
+      {name:'Q1→Med',type:'bar',stack:'box',data:data.q1.map((v,i)=>data.med[i]-v),itemStyle:{color:color1},barWidth:22,
+        label:{show:true,position:'inside',formatter:p=>`${data.q1[p.dataIndex]}〜${data.med[p.dataIndex]}`,fontSize:9,color:'#1E40AF',fontWeight:'bold'}},
+      {name:'Med→Q3',type:'bar',stack:'box',data:data.med.map((v,i)=>data.q3[i]-v),itemStyle:{color:color2,borderRadius:[0,4,4,0]},barWidth:22,
+        label:{show:true,position:'inside',formatter:p=>`${data.med[p.dataIndex]}〜${data.q3[p.dataIndex]}`,fontSize:9,color:'#fff',fontWeight:'bold'}}
+    ]
+  });
+}
+makeBoxChart('box-max', maxQ, 45, '#93C5FD', '#3B82F6');
+makeBoxChart('box-avg', avgQ, 35, '#FCA5A5', '#EF4444');
+
+// ========== HL従業員 / 採用帯 ==========
+const hlOrd = ['テレアポ','リード','リサイクル','受注(リ)','空欄'];
+EC('c-hl-emp').setOption({
+  tooltip:{trigger:'axis'},legend:{top:0,textStyle:{fontSize:9}},grid:{top:40,bottom:40},
+  xAxis:{type:'category',data:hlOrd,axisLabel:{fontSize:10}},
+  yAxis:{type:'value',max:100,axisLabel:{formatter:'{value}%'}},
+  series:[
+    {name:'100名以下',type:'bar',stack:'s',data:[45.2,16.2,13.2,13.6,48.3],itemStyle:{color:'#BFDBFE'}},
+    {name:'101-300',type:'bar',stack:'s',data:[31.6,30.9,30.5,28.8,27.1],itemStyle:{color:'#60A5FA'}},
+    {name:'301-1000',type:'bar',stack:'s',data:[15.2,30.8,31.7,35.4,15.9],itemStyle:{color:'#2563EB'}},
+    {name:'1001名+',type:'bar',stack:'s',data:[5.5,19.4,21.6,20.7,7.3],itemStyle:{color:'#1E3A8A'}}
+  ]
+});
+EC('c-hl-hire').setOption({
+  tooltip:{trigger:'axis'},legend:{top:0,textStyle:{fontSize:9}},grid:{top:40,bottom:40},
+  xAxis:{type:'category',data:hlOrd,axisLabel:{fontSize:10}},
+  yAxis:{type:'value',max:100,axisLabel:{formatter:'{value}%'}},
+  series:[
+    {name:'1-5名',type:'bar',stack:'s',data:[56.7,23.4,17.5,10.5,51.2],itemStyle:{color:'#FCA5A5'}},
+    {name:'6-10名',type:'bar',stack:'s',data:[21.7,24.4,24.2,18.7,21.9],itemStyle:{color:'#FDE68A'}},
+    {name:'11-20名',type:'bar',stack:'s',data:[11.8,22.5,23.9,24.5,13.5],itemStyle:{color:'#86EFAC'}},
+    {name:'21-50名',type:'bar',stack:'s',data:[6.3,16.6,20.2,29.0,8.7],itemStyle:{color:'#93C5FD'}},
+    {name:'51名+',type:'bar',stack:'s',data:[3.5,13.2,14.2,17.3,4.8],itemStyle:{color:'#818CF8'}}
+  ]
+});
+
+// ========== 逆引き ==========
+EC('c-hire-hl').setOption({
+  tooltip:{trigger:'axis'},legend:{top:0,textStyle:{fontSize:9}},grid:{top:40,bottom:50},
+  xAxis:{type:'category',data:['1名','2-3','4-5','6-10','11-15','16-20','21-30','31-50','51+'],axisLabel:{fontSize:9,rotate:25}},
+  yAxis:{type:'value',max:100,axisLabel:{formatter:'{value}%'}},
+  series:[
+    {name:'テレアポ',type:'bar',stack:'s',data:[80.5,75.8,67.8,57.8,48.3,41.7,38.8,34.1,31.3],itemStyle:{color:'#4F46E5'}},
+    {name:'リード',type:'bar',stack:'s',data:[3.6,5.5,9.4,14.2,18.1,21.2,20.2,21.8,25.9],itemStyle:{color:'#22C55E'}},
+    {name:'リサイクル',type:'bar',stack:'s',data:[2.1,3.5,6.9,12.8,17.9,19.9,22.5,23.9,25.6],itemStyle:{color:'#F59E0B'}},
+    {name:'受注(リ)',type:'bar',stack:'s',data:[0.3,0.5,1.1,2.4,4.1,5.9,7.8,8.7,7.7],itemStyle:{color:'#A855F7'}},
+    {name:'空欄',type:'bar',stack:'s',data:[13.6,14.7,14.9,12.8,11.7,11.3,10.7,11.4,9.5],itemStyle:{color:'#94A3B8'}}
+  ]
+});
+EC('c-emp-hl').setOption({
+  tooltip:{trigger:'axis'},legend:{top:0,textStyle:{fontSize:9}},grid:{top:40,bottom:50},
+  xAxis:{type:'category',data:['~50','51-100','101-300','301-500','501-1K','1K-2K','2K-3K','3K-5K','5K~'],axisLabel:{fontSize:9,rotate:25}},
+  yAxis:{type:'value',max:100,axisLabel:{formatter:'{value}%'}},
+  series:[
+    {name:'テレアポ',type:'bar',stack:'s',data:[73.7,71.3,62.1,49.4,43.9,36.6,36.3,31.3,28.5],itemStyle:{color:'#4F46E5'}},
+    {name:'リード',type:'bar',stack:'s',data:[4.3,6.5,12.5,18.6,20.4,24.0,23.6,23.0,30.5],itemStyle:{color:'#22C55E'}},
+    {name:'リサイクル',type:'bar',stack:'s',data:[2.5,5.4,11.0,17.0,19.0,23.0,24.9,28.1,27.0],itemStyle:{color:'#F59E0B'}},
+    {name:'受注(リ)',type:'bar',stack:'s',data:[0.7,1.3,2.6,3.9,6.1,5.8,6.5,6.5,4.5],itemStyle:{color:'#A855F7'}},
+    {name:'空欄',type:'bar',stack:'s',data:[18.8,15.5,11.8,11.2,10.6,10.6,8.6,11.1,9.4],itemStyle:{color:'#94A3B8'}}
+  ]
+});
+
+// ========== 商談結果 ==========
+EC('c-result').setOption({
+  tooltip:{trigger:'item'},
+  series:[{type:'pie',radius:['30%','60%'],label:{formatter:'{b}\n{c}件({d}%)'},
+    data:[{value:1832,name:'未ヨミ',itemStyle:{color:'#EF4444'}},{value:1230,name:'ヨミ',itemStyle:{color:'#22C55E'}},{value:833,name:'受注',itemStyle:{color:'#4F46E5'}},{value:234,name:'チャーン',itemStyle:{color:'#8B5CF6'}},{value:182,name:'未決着',itemStyle:{color:'#94A3B8'}}]}]
+});
+
+// ========== 採用実績別ヨミ化率 ==========
+EC('c-hire-yomi').setOption({
+  tooltip:{trigger:'axis'},legend:{data:['未ヨミ','ヨミ','受注','チャーン','ヨミ化率'],top:0},grid:{bottom:50,top:35},
+  xAxis:{type:'category',data:['1名','2-3名','4-5名','6-10名','11-15名','16-20名','21-30名','31-50名','51名+'],axisLabel:{fontSize:9,rotate:20}},
+  yAxis:[{type:'value',name:'件数'},{type:'value',name:'%',max:75,axisLabel:{formatter:'{value}%'}}],
+  series:[
+    {name:'未ヨミ',type:'bar',stack:'t',data:[27,127,196,449,272,158,185,143,220],itemStyle:{color:'#FCA5A5'}},
+    {name:'ヨミ',type:'bar',stack:'t',data:[12,66,100,276,175,105,135,136,194],itemStyle:{color:'#86EFAC'}},
+    {name:'受注',type:'bar',stack:'t',data:[6,29,50,151,113,87,120,114,139],itemStyle:{color:'#818CF8'}},
+    {name:'チャーン',type:'bar',stack:'t',data:[5,10,16,47,33,21,28,29,36],itemStyle:{color:'#C4B5FD'}},
+    {name:'ヨミ化率',type:'line',yAxisIndex:1,data:[45.1,43.4,43.5,49.0,51.6,55.3,58.5,64.1,59.4],lineStyle:{width:3,color:'#F97316'},itemStyle:{color:'#F97316'},label:{show:true,formatter:'{c}%',fontWeight:'bold',color:'#F97316'}}
+  ]
+});
+
+// ========== 従業員規模別ヨミ化率 ==========
+EC('c-emp-yomi').setOption({
+  tooltip:{trigger:'axis'},legend:{data:['ヨミ計','未ヨミ','ヨミ化率'],top:0},grid:{bottom:55,top:35},
+  xAxis:{type:'category',data:['~50','51-100','101-300','301-500','501-1K','1K-2K','2K-3K','3K-5K','5K~','不明'],axisLabel:{fontSize:9,rotate:30}},
+  yAxis:[{type:'value'},{type:'value',max:70,axisLabel:{formatter:'{value}%'}}],
+  series:[
+    {name:'未ヨミ',type:'bar',stack:'a',data:[72,150,591,294,278,181,70,61,60,75],itemStyle:{color:'#FCA5A5'}},
+    {name:'ヨミ計',type:'bar',stack:'a',data:[112,206,663,352,418,244,101,83,83,35],itemStyle:{color:'#86EFAC'}},
+    {name:'ヨミ化率',type:'line',yAxisIndex:1,data:[56.3,55.2,51.0,52.1,57.7,55.3,56.7,55.7,53.9,29.9],lineStyle:{width:3,color:'#4F46E5'},itemStyle:{color:'#4F46E5'},label:{show:true,formatter:'{c}%',fontWeight:'bold',color:'#4F46E5'}}
+  ]
+});
+
+// ========== BCEX業種テーブル生成 ==========
+(function(){
+  const tb = document.getElementById('bcex-tbody');
+  bcexData.forEach((d,i) => {
+    const cls = d.r >= 55 ? 'bg-green-50' : d.r < 45 ? 'bg-red-50' : '';
+    tb.innerHTML += `<tr class="${cls}"><td>${i+1}</td><td><strong>${d.n}</strong></td><td class="text-right">${d.t}</td><td class="text-right"><strong>${d.r}%</strong></td><td class="text-right">${d.w}%</td></tr>`;
+  });
+})();
+
+// ========== BCEX業種チャート ==========
+EC('c-bcex').setOption({
+  tooltip:{trigger:'axis'},legend:{data:['ヨミ化率','受注率'],top:0},
+  grid:{left:120,right:50,top:30,bottom:20},
+  xAxis:{type:'value',max:80,axisLabel:{formatter:'{value}%'}},
+  yAxis:{type:'category',data:bcexData.map(d=>d.n).reverse(),axisLabel:{fontSize:10}},
+  series:[
+    {name:'ヨミ化率',type:'bar',data:[...bcexData].reverse().map(d=>d.r),itemStyle:{color:p=>p.value>=55?'#22C55E':p.value>=45?'#F59E0B':'#EF4444'},label:{show:true,position:'right',formatter:'{c}%',fontSize:9}},
+    {name:'受注率',type:'bar',data:[...bcexData].reverse().map(d=>d.w),itemStyle:{color:'#818CF8'},label:{show:true,position:'right',formatter:'{c}%',fontSize:9}}
+  ]
+});
+
+// ========== ヒートマップ共通オプション ==========
+function makeHeatmap(elId, xLabels, yLabels, data, xRotate, leftPad) {
+  EC(elId).setOption({
+    tooltip:{formatter:p=>{
+      const d=p.data;
+      return `<b>${xLabels[d[0]]}</b> × <b>${yLabels[d[1]]}</b><br>ヨミ化率: <b>${d[2]}%</b><br>商談数: <b>${d[3]}件</b>`;
+    }},
+    grid:{left:leftPad||130,right:90,top:40,bottom:xRotate>30?70:50},
+    xAxis:{type:'category',data:xLabels,axisLabel:{fontSize:9,rotate:xRotate||0,interval:0},splitArea:{show:true}},
+    yAxis:{type:'category',data:yLabels,axisLabel:{fontSize:10},splitArea:{show:true}},
+    visualMap:{min:15,max:100,calculable:true,orient:'vertical',right:5,top:'center',
+      inRange:{color:['#FEE2E2','#FED7AA','#FEF08A','#BBF7D0','#22C55E']},text:['高','低'],textStyle:{fontSize:10}},
+    series:[{type:'heatmap',data:data,label:{show:true,formatter:p=>p.data[2]+'%',fontSize:8},
+      itemStyle:{borderWidth:1,borderColor:'#fff'}}]
+  });
+}
+
+// S8: BCEX業種×採用実績
+makeHeatmap('c-cross1', ind1, hire1, hm1.map(d=>[d[0],d[1],d[2],d[3]]), 45, 80);
+
+// S9: 従業員規模×採用実績
+makeHeatmap('c-cross2', empL2, hireL2, hm2, 30, 80);
+
+// S10: 従業員規模×BCEX業種
+makeHeatmap('c-cross3', indL3, empL3, hm3, 50, 80);
+
+// ========== リサイズ ==========
+window.addEventListener('resize',()=>{
+  document.querySelectorAll('[id^=c-],[id^=box-]').forEach(el=>{
+    const c=echarts.getInstanceByDom(el);if(c)c.resize();
+  });
+});
+</script>
+</body>
+</html>

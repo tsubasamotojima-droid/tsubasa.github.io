@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>利用企業シェア率 × 市場ギャップ分析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+    <style>
+        body { background: #0f172a; color: #e2e8f0; font-family: 'Inter', system-ui, sans-serif; }
+        .card { background: #1e293b; border-radius: 16px; border: 1px solid #334155; }
+        .badge-hot { background: #dc2626; color: white; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 600; }
+        .badge-cold { background: #2563eb; color: white; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 600; }
+        .badge-ok { background: #16a34a; color: white; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 600; }
+        table th { position: sticky; top: 0; background: #1e293b; z-index: 1; }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-6">
+
+<div class="max-w-7xl mx-auto">
+
+    <!-- Header -->
+    <div class="flex items-center gap-4 mb-6">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-2xl">📊</div>
+        <div>
+            <h1 class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">利用企業シェア率 × 市場ギャップ分析</h1>
+            <p class="text-slate-400 text-sm">BC企業分布に対する利用企業のシェア率・社数拡大余地の分析 ｜ 2026年3月2日</p>
+        </div>
+    </div>
+
+    <!-- KPI -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="card p-5 text-center">
+            <div class="text-slate-400 text-xs mb-1">利用企業数</div>
+            <div class="text-3xl font-bold text-blue-400">1,386</div>
+            <div class="text-slate-500 text-xs mt-1">新卒807 / 中途238 / 両方341</div>
+        </div>
+        <div class="card p-5 text-center">
+            <div class="text-slate-400 text-xs mb-1">BC市場企業数(業種計)</div>
+            <div class="text-3xl font-bold text-green-400">843,178</div>
+            <div class="text-slate-500 text-xs mt-1">31業種合計</div>
+        </div>
+        <div class="card p-5 text-center">
+            <div class="text-slate-400 text-xs mb-1">全体シェア率</div>
+            <div class="text-3xl font-bold text-yellow-400">0.164%</div>
+            <div class="text-slate-500 text-xs mt-1">1,386 / 843,178</div>
+        </div>
+        <div class="card p-5 text-center">
+            <div class="text-slate-400 text-xs mb-1">最大ギャップ業界</div>
+            <div class="text-3xl font-bold text-red-400">建設</div>
+            <div class="text-slate-500 text-xs mt-1">市場20.9% → 利用9.5% (▲11.5pt)</div>
+        </div>
+    </div>
+
+    <!-- Industry Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="card p-6">
+            <h2 class="text-lg font-bold mb-4">🏭 業界別シェア率（全31業界）</h2>
+            <div id="industryShareChart" style="height: 700px;"></div>
+        </div>
+        <div class="card p-6">
+            <h2 class="text-lg font-bold mb-4">🎯 業界別ギャップ（利用構成比 − 市場構成比）</h2>
+            <div id="industryGapChart" style="height: 700px;"></div>
+        </div>
+    </div>
+
+    <!-- Industry Full Table -->
+    <div class="card p-6 mb-6">
+        <h2 class="text-lg font-bold mb-4">📋 業界別 詳細一覧（全31業界・ギャップ順）</h2>
+        <div class="overflow-x-auto" style="max-height: 800px; overflow-y: auto;">
+            <table class="w-full text-sm">
+                <thead><tr class="border-b border-slate-700 text-slate-400 text-xs">
+                    <th class="py-2 px-2 text-left">#</th>
+                    <th class="py-2 px-2 text-left">業界</th>
+                    <th class="py-2 px-2 text-right">市場企業数</th>
+                    <th class="py-2 px-2 text-right">市場構成比</th>
+                    <th class="py-2 px-2 text-right">利用企業数</th>
+                    <th class="py-2 px-2 text-right">利用構成比</th>
+                    <th class="py-2 px-2 text-right">シェア率</th>
+                    <th class="py-2 px-2 text-right">ギャップ</th>
+                    <th class="py-2 px-2 text-right">平均シェア時<br>期待社数</th>
+                    <th class="py-2 px-2 text-right">潜在獲得数</th>
+                    <th class="py-2 px-2 text-center">判定</th>
+                </tr></thead>
+                <tbody id="indTbody"></tbody>
+                <tfoot id="indTfoot"></tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- Prefecture Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="card p-6">
+            <h2 class="text-lg font-bold mb-4">🗾 都道府県別 構成比比較（全47）</h2>
+            <div id="prefGapChart" style="height: 900px;"></div>
+        </div>
+        <div class="card p-6">
+            <h2 class="text-lg font-bold mb-4">👥 従業員規模別 構成比 & シェア率</h2>
+            <div id="sizeChart" style="height: 420px;"></div>
+            <div class="mt-6">
+                <h3 class="text-base font-bold mb-3">📊 従業員規模別 詳細</h3>
+                <table class="w-full text-sm">
+                    <thead><tr class="border-b border-slate-700 text-slate-400 text-xs">
+                        <th class="py-2 px-2 text-left">規模</th>
+                        <th class="py-2 px-2 text-right">市場企業数</th>
+                        <th class="py-2 px-2 text-right">市場構成比</th>
+                        <th class="py-2 px-2 text-right">利用企業数</th>
+                        <th class="py-2 px-2 text-right">利用構成比</th>
+                        <th class="py-2 px-2 text-right">シェア率</th>
+                        <th class="py-2 px-2 text-right">ギャップ</th>
+                    </tr></thead>
+                    <tbody id="sizeTbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prefecture Full Table -->
+    <div class="card p-6 mb-6">
+        <h2 class="text-lg font-bold mb-4">🗾 都道府県別 詳細一覧（全47都道府県・ギャップ順）</h2>
+        <div class="overflow-x-auto" style="max-height: 900px; overflow-y: auto;">
+            <table class="w-full text-sm">
+                <thead><tr class="border-b border-slate-700 text-slate-400 text-xs">
+                    <th class="py-2 px-2 text-left">#</th>
+                    <th class="py-2 px-2 text-left">都道府県</th>
+                    <th class="py-2 px-2 text-right">市場企業数</th>
+                    <th class="py-2 px-2 text-right">市場構成比</th>
+                    <th class="py-2 px-2 text-right">利用企業数</th>
+                    <th class="py-2 px-2 text-right">利用構成比</th>
+                    <th class="py-2 px-2 text-right">シェア率</th>
+                    <th class="py-2 px-2 text-right">ギャップ</th>
+                    <th class="py-2 px-2 text-center">判定</th>
+                </tr></thead>
+                <tbody id="prefTbody"></tbody>
+                <tfoot id="prefTfoot"></tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- Insights -->
+    <div class="card p-6 mb-6">
+        <h2 class="text-lg font-bold mb-4">💡 社数拡大に向けた重点分析サマリー</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-red-950/30 border border-red-900/50 rounded-xl p-5">
+                <h3 class="font-bold text-red-400 mb-3">🚨 最大の未開拓市場（業界）</h3>
+                <ul class="space-y-2 text-sm text-slate-300">
+                    <li><strong class="text-red-400">建設・工事</strong>：市場20.9%に対し利用9.5%。ギャップ▲11.5pt。市場最大の業界だが浸透率0.074%と最低水準。<strong>潜在獲得余地 約160社</strong></li>
+                    <li><strong class="text-red-400">不動産</strong>：市場7.5%→利用4.0%。ギャップ▲3.5pt。シェア率0.087%</li>
+                    <li><strong class="text-red-400">食品</strong>：市場4.4%→利用2.3%。ギャップ▲2.2pt</li>
+                    <li><strong class="text-red-400">商社</strong>：市場4.8%→利用3.8%。ギャップ▲1.1pt</li>
+                    <li><strong class="text-red-400">運輸・物流</strong>：市場4.0%→利用2.2%。ギャップ▲1.8pt</li>
+                </ul>
+            </div>
+            <div class="bg-green-950/30 border border-green-900/50 rounded-xl p-5">
+                <h3 class="font-bold text-green-400 mb-3">✅ 強みのある領域（過剰浸透）</h3>
+                <ul class="space-y-2 text-sm text-slate-300">
+                    <li><strong class="text-green-400">IT業界</strong>：市場3.5%に対し利用15.9%。+12.4pt。シェア率0.737%で圧倒的に強い。成功事例の横展開元</li>
+                    <li><strong class="text-green-400">機械業界</strong>：市場3.1%→利用14.6%。+11.5pt。製造系への展開力</li>
+                    <li><strong class="text-green-400">コンサルティング</strong>：市場4.4%→利用8.9%。HR感度の高い顧客層</li>
+                    <li><strong class="text-green-400">外食</strong>：市場1.8%→利用3.2%。高回転採用ニーズにフィット</li>
+                    <li><strong class="text-green-400">金融</strong>：市場1.3%→利用2.2%。+0.9pt</li>
+                </ul>
+            </div>
+            <div class="bg-blue-950/30 border border-blue-900/50 rounded-xl p-5">
+                <h3 class="font-bold text-blue-400 mb-3">📍 地域 & 規模の注目ポイント</h3>
+                <ul class="space-y-2 text-sm text-slate-300">
+                    <li><strong class="text-blue-400">東京偏重</strong>：利用の53.5%が東京（市場は21.1%）。+32.4ptで突出した集中</li>
+                    <li><strong class="text-blue-400">埼玉・北海道・千葉・茨城</strong>：市場規模は大きいが利用構成比が大幅に低く未開拓</li>
+                    <li><strong class="text-blue-400">京都</strong>：市場2.3%→利用1.3%。17社で健闘するがまだ余地あり</li>
+                    <li><strong class="text-blue-400">従業員1~50名</strong>：市場の89.2%を占めるが利用は11.4%のみ。SMB開拓が最大の鍵</li>
+                    <li><strong class="text-blue-400">101~300名</strong>：利用構成比28.7%で最も強い。上下への拡大起点</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ===== MASTER DATA =====
+// BC市場データ（業種分布）: ラベル → 件数
+const bcIndustry = [
+    {label:"建設・工事業界", market:176612}, {label:"不動産業界", market:62922},
+    {label:"その他サービス業界", market:60008}, {label:"小売業界", market:42338},
+    {label:"製造業界", market:41777}, {label:"商社業界", market:40816},
+    {label:"食品業界", market:37468}, {label:"コンサルティング業界", market:37100},
+    {label:"医療・福祉業界", market:35031}, {label:"運輸・物流業界", market:34145},
+    {label:"自動車・乗り物業界", market:33738}, {label:"IT業界", market:29835},
+    {label:"エンタメ業界", market:28801}, {label:"機械業界", market:25982},
+    {label:"アパレル・美容業界", market:21267}, {label:"広告業界", market:20480},
+    {label:"生活用品業界", market:16825}, {label:"人材業界", market:16807},
+    {label:"外食業界", market:15145}, {label:"化学業界", market:12202},
+    {label:"金融業界", market:10965}, {label:"教育業界", market:9015},
+    {label:"機械関連サービス業界", market:7782}, {label:"エネルギー業界", market:7396},
+    {label:"電気製品業界", market:7016}, {label:"マスコミ業界", market:5965},
+    {label:"専門サービス業界", market:1785}, {label:"通信業界", market:1700},
+    {label:"ゲーム業界", market:1407}, {label:"通信機器業界", market:1282},
+    {label:"その他業界", market:681}
+];
+
+// 利用企業マスタ（業界）: 業界名 → 利用社数
+const usageIndustryRaw = {
+    "IT":220, "機械業界":202, "建設・工事":131, "コンサルティング":123, "小売":92,
+    "その他サービス":68, "医療・福祉":67, "エンタメ":56, "不動産業界":55, "商社":52,
+    "外食":45, "製造":33, "食品":32, "運輸・物流":31, "金融":31,
+    "自動車・乗り物":29, "アパレル・美容業界":25, "機械関連サービス":13, "人材":13,
+    "生活用品":11, "エネルギー":11, "広告":10, "専門サービス":9, "電気製品":7,
+    "通信":5, "教育":5, "マスコミ":4, "通信機器":3, "その他":2, "ゲーム":1
+};
+
+// 正規化マッピング: BC市場ラベルから「業界」を除去した名前 → 利用マスタのキー候補
+function findUsage(bcLabel) {
+    // まずBCラベルそのままで探す
+    if (usageIndustryRaw[bcLabel] !== undefined) return usageIndustryRaw[bcLabel];
+    // 「業界」を除去して探す
+    const short = bcLabel.replace(/業界$/, '');
+    if (usageIndustryRaw[short] !== undefined) return usageIndustryRaw[short];
+    // 利用マスタ側が「〇〇業界」で登録されているケース
+    if (usageIndustryRaw[short + '業界'] !== undefined) return usageIndustryRaw[short + '業界'];
+    return 0;
+}
+
+const totalMarketInd = bcIndustry.reduce((s,d) => s + d.market, 0);
+const totalUsage = 1386;
+const avgShareRate = totalUsage / totalMarketInd;
+
+const industryData = bcIndustry.map(d => {
+    const name = d.label.replace(/業界$/, '');
+    const usage = findUsage(d.label);
+    const marketPct = d.market / totalMarketInd * 100;
+    const usagePct = usage / totalUsage * 100;
+    const gap = usagePct - marketPct;
+    const shareRate = d.market > 0 ? usage / d.market * 100 : 0;
+    const expected = Math.round(d.market * avgShareRate);
+    const potential = expected - usage;
+    return { name, label: d.label, market: d.market, usage, marketPct, usagePct, gap, shareRate, expected, potential };
+}).sort((a,b) => a.gap - b.gap);
+
+// Verify totals
+const totalUsageCheck = industryData.reduce((s,d) => s + d.usage, 0);
+console.log('Industry usage total check:', totalUsageCheck, '/ expected:', totalUsage);
+
+// ===== PREFECTURE DATA =====
+const bcPref = [
+    {label:"東京都",market:162135},{label:"大阪府",market:69555},{label:"愛知県",market:48320},
+    {label:"神奈川県",market:46092},{label:"埼玉県",market:35251},{label:"北海道",market:35158},
+    {label:"福岡県",market:32628},{label:"兵庫県",market:29090},{label:"千葉県",market:27532},
+    {label:"静岡県",market:23880},{label:"広島県",market:19083},{label:"京都府",market:17739},
+    {label:"茨城県",market:16051},{label:"新潟県",market:15562},{label:"長野県",market:15076},
+    {label:"群馬県",market:13980},{label:"宮城県",market:13937},{label:"岐阜県",market:13545},
+    {label:"福島県",market:13012},{label:"岡山県",market:12821},{label:"栃木県",market:12373},
+    {label:"三重県",market:9926},{label:"鹿児島県",market:9762},{label:"愛媛県",market:9273},
+    {label:"熊本県",market:9214},{label:"石川県",market:8507},{label:"沖縄県",market:8100},
+    {label:"山形県",market:7427},{label:"富山県",market:7250},{label:"青森県",market:7106},
+    {label:"山口県",market:7034},{label:"長崎県",market:6918},{label:"大分県",market:6892},
+    {label:"香川県",market:6791},{label:"岩手県",market:6696},{label:"滋賀県",market:6677},
+    {label:"福井県",market:6239},{label:"宮崎県",market:6037},{label:"秋田県",market:5885},
+    {label:"山梨県",market:5568},{label:"奈良県",market:5392},{label:"和歌山県",market:5016},
+    {label:"徳島県",market:4531},{label:"島根県",market:4203},{label:"佐賀県",market:4097},
+    {label:"高知県",market:3679},{label:"鳥取県",market:3253}
+];
+
+const usagePrefRaw = {
+    "東京":725,"大阪":160,"愛知":75,"神奈川":65,"兵庫":37,"静岡":32,"福岡":30,"千葉":25,
+    "埼玉":20,"北海道":18,"京都":17,"岡山":15,"広島":15,"熊本":13,"岐阜":11,"長野":10,
+    "群馬":10,"新潟":8,"福井":8,"栃木":7,"富山":6,"石川":6,"滋賀":6,"沖縄":6,
+    "福島":5,"愛媛":5,"山口":5,"宮城":5,"鹿児島":5,"三重":4,"岩手":4,"大分":4,
+    "佐賀":3,"山梨":3,"徳島":3,"茨城":3,"宮崎":2,"奈良":2,"和歌山":2,"高知":1,
+    "山形":1,"秋田":1,"青森":1,"長崎":1
+};
+
+// 安全な都道府県名正規化
+function normalizePref(label) {
+    // 特殊ケース
+    if (label === '北海道') return '北海道';
+    if (label === '京都府') return '京都';
+    // 通常: 末尾の都/府/県を除去
+    return label.replace(/[都府県]$/, '');
+}
+
+const totalMarketPref = bcPref.reduce((s,d) => s + d.market, 0);
+const totalUsagePref = Object.values(usagePrefRaw).reduce((s,v) => s + v, 0);
+
+const prefData = bcPref.map(d => {
+    const short = normalizePref(d.label);
+    const usage = usagePrefRaw[short] || 0;
+    const marketPct = d.market / totalMarketPref * 100;
+    const usagePct = usage / totalUsagePref * 100;
+    const gap = usagePct - marketPct;
+    const shareRate = d.market > 0 ? usage / d.market * 100 : 0;
+    return { label: d.label, short, market: d.market, usage, marketPct, usagePct, gap, shareRate };
+}).sort((a,b) => a.gap - b.gap);
+
+// Verify
+const totalPrefUsageCheck = prefData.reduce((s,d) => s + d.usage, 0);
+console.log('Pref usage total check:', totalPrefUsageCheck, '/ expected:', totalUsagePref);
+
+// ===== SIZE DATA =====
+const sizeOrder = ['1~50','51~100','101~300','301~500','501~1000','1001~2000','2001~'];
+const sizeMarket = [578059,31778,26154,5204,3777,1676,1445];
+const sizeUsage = [158,174,398,195,214,122,125];
+const totalSM = sizeMarket.reduce((s,v)=>s+v,0);
+const totalSU = sizeUsage.reduce((s,v)=>s+v,0);
+
+// ===== RENDER INDUSTRY TABLE =====
+const indTbody = document.getElementById('indTbody');
+const indTfoot = document.getElementById('indTfoot');
+let indUsageSum = 0, indMarketSum = 0;
+industryData.forEach((d, i) => {
+    indUsageSum += d.usage;
+    indMarketSum += d.market;
+    const gapColor = d.gap < 0 ? 'text-red-400' : 'text-green-400';
+    const potColor = d.potential > 0 ? 'text-yellow-400' : 'text-slate-500';
+    const badge = d.gap < -1 ? '<span class="badge-hot">未開拓</span>' : d.gap > 1 ? '<span class="badge-ok">強み</span>' : '<span class="badge-cold">適正</span>';
+    indTbody.innerHTML += `<tr class="border-b border-slate-800/50 hover:bg-slate-800/30">
+        <td class="py-1.5 px-2 text-slate-500">${i+1}</td>
+        <td class="py-1.5 px-2 font-medium">${d.name}</td>
+        <td class="py-1.5 px-2 text-right text-slate-400">${d.market.toLocaleString()}</td>
+        <td class="py-1.5 px-2 text-right">${d.marketPct.toFixed(1)}%</td>
+        <td class="py-1.5 px-2 text-right text-blue-400 font-semibold">${d.usage}</td>
+        <td class="py-1.5 px-2 text-right">${d.usagePct.toFixed(1)}%</td>
+        <td class="py-1.5 px-2 text-right ${d.shareRate > 0.2 ? 'text-green-400' : 'text-red-400'}">${d.shareRate.toFixed(3)}%</td>
+        <td class="py-1.5 px-2 text-right font-semibold ${gapColor}">${d.gap > 0 ? '+' : ''}${d.gap.toFixed(1)}pt</td>
+        <td class="py-1.5 px-2 text-right text-slate-400">${d.expected}</td>
+        <td class="py-1.5 px-2 text-right font-semibold ${potColor}">${d.potential > 0 ? '+' + d.potential : d.potential}</td>
+        <td class="py-1.5 px-2 text-center">${badge}</td>
+    </tr>`;
+});
+indTfoot.innerHTML = `<tr class="border-t-2 border-slate-600 font-bold">
+    <td class="py-2 px-2" colspan="2">合計</td>
+    <td class="py-2 px-2 text-right">${indMarketSum.toLocaleString()}</td>
+    <td class="py-2 px-2 text-right">100%</td>
+    <td class="py-2 px-2 text-right text-blue-400">${indUsageSum}</td>
+    <td class="py-2 px-2 text-right">100%</td>
+    <td class="py-2 px-2 text-right">${(indUsageSum/indMarketSum*100).toFixed(3)}%</td>
+    <td class="py-2 px-2" colspan="4"></td>
+</tr>`;
+
+// ===== RENDER PREF TABLE =====
+const prefTbody = document.getElementById('prefTbody');
+const prefTfoot = document.getElementById('prefTfoot');
+let prefUsSum = 0, prefMkSum = 0;
+prefData.forEach((d, i) => {
+    prefUsSum += d.usage;
+    prefMkSum += d.market;
+    const gapColor = d.gap < 0 ? 'text-red-400' : 'text-green-400';
+    const badge = d.gap < -1.5 ? '<span class="badge-hot">要開拓</span>' : d.gap > 5 ? '<span class="badge-ok">強み</span>' : '<span class="badge-cold">適正</span>';
+    prefTbody.innerHTML += `<tr class="border-b border-slate-800/50 hover:bg-slate-800/30">
+        <td class="py-1.5 px-2 text-slate-500">${i+1}</td>
+        <td class="py-1.5 px-2 font-medium">${d.label}</td>
+        <td class="py-1.5 px-2 text-right text-slate-400">${d.market.toLocaleString()}</td>
+        <td class="py-1.5 px-2 text-right">${d.marketPct.toFixed(1)}%</td>
+        <td class="py-1.5 px-2 text-right text-blue-400 font-semibold">${d.usage}</td>
+        <td class="py-1.5 px-2 text-right">${d.usagePct.toFixed(1)}%</td>
+        <td class="py-1.5 px-2 text-right ${d.shareRate > 0.1 ? 'text-green-400' : 'text-red-400'}">${d.shareRate.toFixed(3)}%</td>
+        <td class="py-1.5 px-2 text-right font-semibold ${gapColor}">${d.gap > 0 ? '+' : ''}${d.gap.toFixed(1)}pt</td>
+        <td class="py-1.5 px-2 text-center">${badge}</td>
+    </tr>`;
+});
+prefTfoot.innerHTML = `<tr class="border-t-2 border-slate-600 font-bold">
+    <td class="py-2 px-2" colspan="2">合計</td>
+    <td class="py-2 px-2 text-right">${prefMkSum.toLocaleString()}</td>
+    <td class="py-2 px-2 text-right">100%</td>
+    <td class="py-2 px-2 text-right text-blue-400">${prefUsSum}</td>
+    <td class="py-2 px-2 text-right">100%</td>
+    <td class="py-2 px-2 text-right">${(prefUsSum/prefMkSum*100).toFixed(3)}%</td>
+    <td class="py-2 px-2" colspan="2"></td>
+</tr>`;
+
+// ===== RENDER SIZE TABLE =====
+const sizeTbody = document.getElementById('sizeTbody');
+sizeOrder.forEach((label, i) => {
+    const mkPct = (sizeMarket[i]/totalSM*100);
+    const usPct = (sizeUsage[i]/totalSU*100);
+    const gap = usPct - mkPct;
+    const sr = (sizeUsage[i]/sizeMarket[i]*100);
+    const gapColor = gap < 0 ? 'text-red-400' : 'text-green-400';
+    sizeTbody.innerHTML += `<tr class="border-b border-slate-800/50">
+        <td class="py-1.5 px-2 font-medium">${label}</td>
+        <td class="py-1.5 px-2 text-right text-slate-400">${sizeMarket[i].toLocaleString()}</td>
+        <td class="py-1.5 px-2 text-right">${mkPct.toFixed(1)}%</td>
+        <td class="py-1.5 px-2 text-right text-blue-400 font-semibold">${sizeUsage[i]}</td>
+        <td class="py-1.5 px-2 text-right">${usPct.toFixed(1)}%</td>
+        <td class="py-1.5 px-2 text-right ${sr > 1 ? 'text-green-400' : 'text-red-400'}">${sr.toFixed(3)}%</td>
+        <td class="py-1.5 px-2 text-right font-semibold ${gapColor}">${gap > 0 ? '+' : ''}${gap.toFixed(1)}pt</td>
+    </tr>`;
+});
+
+// ===== CHARTS =====
+
+// Industry Share Rate Chart (all 31)
+const indShareChart = echarts.init(document.getElementById('industryShareChart'));
+const indShareSorted = [...industryData].sort((a,b) => a.shareRate - b.shareRate);
+indShareChart.setOption({
+    tooltip: { trigger: 'axis', formatter: p => `${p[0].name}<br/>シェア率: ${p[0].value}%<br/>利用: ${indShareSorted[p[0].dataIndex].usage}社 / 市場: ${indShareSorted[p[0].dataIndex].market.toLocaleString()}社` },
+    grid: { left: 140, right: 70, top: 10, bottom: 20 },
+    xAxis: { type: 'value', axisLabel: { formatter: '{value}%', color: '#94a3b8', fontSize: 10 }, splitLine: { lineStyle: { color: '#334155' }}},
+    yAxis: { type: 'category', data: indShareSorted.map(d => d.name), axisLabel: { color: '#e2e8f0', fontSize: 11 }},
+    series: [{
+        type: 'bar', barWidth: 14,
+        data: indShareSorted.map(d => ({
+            value: parseFloat(d.shareRate.toFixed(3)),
+            itemStyle: { color: d.shareRate >= 0.3 ? '#4ade80' : d.shareRate >= 0.15 ? '#fbbf24' : '#f87171', borderRadius: [0,3,3,0] }
+        })),
+        label: { show: true, position: 'right', formatter: p => p.value + '%', color: '#e2e8f0', fontSize: 9 }
+    }]
+});
+
+// Industry Gap Chart (all 31)
+const indGapChart = echarts.init(document.getElementById('industryGapChart'));
+const indGapSorted = [...industryData]; // already sorted by gap asc
+indGapChart.setOption({
+    tooltip: { trigger: 'axis', formatter: p => `${p[0].name}<br/>ギャップ: ${p[0].value > 0 ? '+' : ''}${p[0].value}pt<br/>市場構成比: ${indGapSorted[p[0].dataIndex].marketPct.toFixed(1)}%<br/>利用構成比: ${indGapSorted[p[0].dataIndex].usagePct.toFixed(1)}%` },
+    grid: { left: 140, right: 50, top: 10, bottom: 20 },
+    xAxis: { type: 'value', axisLabel: { formatter: '{value}pt', color: '#94a3b8', fontSize: 10 }, splitLine: { lineStyle: { color: '#334155' }}},
+    yAxis: { type: 'category', data: indGapSorted.map(d => d.name), axisLabel: { color: '#e2e8f0', fontSize: 11 }},
+    series: [{
+        type: 'bar', barWidth: 14,
+        data: indGapSorted.map(d => ({
+            value: parseFloat(d.gap.toFixed(1)),
+            itemStyle: { color: d.gap > 0 ? '#4ade80' : '#f87171', borderRadius: d.gap > 0 ? [0,4,4,0] : [4,0,0,4] }
+        })),
+        label: { show: true, position: 'outside', formatter: p => (p.value > 0 ? '+' : '') + p.value + 'pt', color: '#e2e8f0', fontSize: 9 }
+    }]
+});
+
+// Prefecture Gap Chart (all 47)
+const prefGapChart = echarts.init(document.getElementById('prefGapChart'));
+const prefGapSorted = [...prefData]; // already sorted by gap asc
+prefGapChart.setOption({
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }},
+    legend: { data: ['市場構成比','利用構成比'], textStyle: { color: '#94a3b8', fontSize: 11 }, top: 0 },
+    grid: { left: 70, right: 30, top: 35, bottom: 20 },
+    xAxis: { type: 'value', axisLabel: { formatter: '{value}%', color: '#94a3b8', fontSize: 10 }, splitLine: { lineStyle: { color: '#334155' }}},
+    yAxis: { type: 'category', data: prefGapSorted.map(d => d.short), axisLabel: { color: '#e2e8f0', fontSize: 10 }},
+    series: [
+        { name: '市場構成比', type: 'bar', barWidth: 8, data: prefGapSorted.map(d => parseFloat(d.marketPct.toFixed(1))), itemStyle: { color: '#475569', borderRadius: [0,2,2,0] }},
+        { name: '利用構成比', type: 'bar', barWidth: 8, data: prefGapSorted.map(d => parseFloat(d.usagePct.toFixed(1))), itemStyle: { color: '#3b82f6', borderRadius: [0,2,2,0] }}
+    ]
+});
+
+// Size Chart
+const sizeChartEl = echarts.init(document.getElementById('sizeChart'));
+sizeChartEl.setOption({
+    tooltip: { trigger: 'axis' },
+    legend: { data: ['市場構成比','利用構成比','シェア率'], textStyle: { color: '#94a3b8' }, top: 0 },
+    grid: { left: 55, right: 55, top: 45, bottom: 30 },
+    xAxis: { type: 'category', data: sizeOrder, axisLabel: { color: '#e2e8f0', fontSize: 10, rotate: 15 }},
+    yAxis: [
+        { type: 'value', axisLabel: { formatter: '{value}%', color: '#94a3b8', fontSize: 10 }, splitLine: { lineStyle: { color: '#334155' }}, max: 100 },
+        { type: 'value', axisLabel: { formatter: '{value}%', color: '#fbbf24', fontSize: 10 }, splitLine: { show: false }}
+    ],
+    series: [
+        { name: '市場構成比', type: 'bar', data: sizeMarket.map(v => parseFloat((v/totalSM*100).toFixed(1))), itemStyle: { color: '#475569', borderRadius: [4,4,0,0] }},
+        { name: '利用構成比', type: 'bar', data: sizeUsage.map(v => parseFloat((v/totalSU*100).toFixed(1))), itemStyle: { color: '#3b82f6', borderRadius: [4,4,0,0] }},
+        { name: 'シェア率', type: 'line', yAxisIndex: 1, data: sizeMarket.map((v,i) => parseFloat((sizeUsage[i]/v*100).toFixed(2))),
+          itemStyle: { color: '#fbbf24' }, lineStyle: { width: 3 }, symbol: 'circle', symbolSize: 8,
+          label: { show: true, formatter: p => p.value + '%', color: '#fbbf24', fontSize: 10 }}
+    ]
+});
+
+window.addEventListener('resize', () => {
+    indShareChart.resize(); indGapChart.resize(); prefGapChart.resize(); sizeChartEl.resize();
+});
+</script>
+</body>
+</html>
