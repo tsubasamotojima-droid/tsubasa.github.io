@@ -1,16 +1,88 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>分析レポート一覧</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 40px 20px;
+      background: #0b1020;
+      color: #ffffff;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+    p {
+      color: #b8c0d9;
+      margin-bottom: 32px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      display: block;
+      text-decoration: none;
+      background: #151c33;
+      border: 1px solid #27304d;
+      border-radius: 16px;
+      padding: 24px;
+      color: #ffffff;
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: #5b8cff;
+      background: #1a2340;
+    }
+    .card-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+    .card-desc {
+      font-size: 14px;
+      color: #b8c0d9;
+      line-height: 1.7;
+    }
+  </style>
 </head>
 <body>
-  <h1>分析レポート一覧</h1>
-  <ul>
-    <li><a href="./利用企業マスタ%20利用区分別特徴分析.html">利用企業マスタ 利用区分別特徴分析</a></li>
-    <li><a href="./マイナビ2027掲載企業%20網羅的分析レポート.html">マイナビ2027掲載企業 網羅的分析レポート</a></li>
-    <li><a href="./利用企業と市場区分.html">利用企業と市場区分</a></li>
-  </ul>
+  <div class="container">
+    <h1>分析レポート一覧</h1>
+    <p>公開中の分析ページはこちらからご覧いただけます。</p>
+
+    <div class="grid">
+      <a class="card" href="./利用企業マスタ 利用区分別特徴分析.html">
+        <div class="card-title">利用企業マスタ 利用区分別特徴分析</div>
+        <div class="card-desc">利用区分ごとの特徴を確認するレポートです。</div>
+      </a>
+
+      <a class="card" href="./マイナビ2027掲載企業 網羅的分析レポート.html">
+        <div class="card-title">マイナビ2027掲載企業 網羅的分析レポート</div>
+        <div class="card-desc">マイナビ2027掲載企業の網羅的な分析ページです。</div>
+      </a>
+
+      <a class="card" href="./利用企業と市場区分.html">
+        <div class="card-title">利用企業と市場区分</div>
+        <div class="card-desc">利用企業と市場区分の関係を確認するページです。</div>
+      </a>
+
+      <a class="card" href="./TAM.html">
+        <div class="card-title">TAM</div>
+        <div class="card-desc">TAMに関する分析ページです。</div>
+      </a>
+    </div>
+  </div>
 </body>
 </html>
