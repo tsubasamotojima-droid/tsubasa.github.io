@@ -78,6 +78,7 @@
     .kpi-card.red::before    { background: #e53e3e; }
     .kpi-card.purple::before { background: #805ad5; }
     .kpi-card.orange::before { background: #dd6b20; }
+    .kpi-card.yellow::before { background: #d69e2e; }
     .kpi-label { font-size: 0.72rem; color: #718096; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
     .kpi-value { font-size: 1.6rem; font-weight: 700; color: #fff; line-height: 1.1; }
     .kpi-sub   { font-size: 0.72rem; color: #a0aec0; margin-top: 4px; }
@@ -117,16 +118,14 @@
       margin-bottom: 16px;
       padding-left: 4px;
     }
-    /* スクロール可能なコンテナ — canvasはここに収まる */
     .chart-scroll {
       width: 100%;
       overflow-x: auto;
       overflow-y: hidden;
     }
-    /* canvasを包むdivで高さを固定し、幅はJSで制御 */
     .chart-inner {
       position: relative;
-      height: 420px; /* 固定高さ */
+      height: 440px;
     }
     .chart-inner canvas {
       display: block;
@@ -234,7 +233,7 @@
     <div class="kpi-sub">対象企業数（社）</div>
   </div>
   <div class="kpi-card green">
-    <div class="kpi-label">総商談件数</div>
+    <div class="kpi-label">総商談件数（実施）</div>
     <div class="kpi-value">1,792</div>
     <div class="kpi-sub">業界分類あり: 1,332件</div>
   </div>
@@ -259,7 +258,7 @@
     <option value="order_asc">受注率 昇順</option>
     <option value="yomi_desc">ヨミ化率 降順</option>
     <option value="yomi_asc">ヨミ化率 昇順</option>
-    <option value="total_desc">商談件数 降順</option>
+    <option value="total_desc">実施件数 降順</option>
     <option value="name_asc">業界名 昇順</option>
   </select>
   <label style="margin-left:12px;">表示件数:</label>
@@ -272,10 +271,8 @@
 </div>
 
 <div class="chart-wrapper">
-  <div class="chart-title" id="chartTitle">業界別 TAM・受注率・ヨミ化率（仮説①）</div>
-  <!-- スクロールコンテナ -->
+  <div class="chart-title" id="chartTitle">業界別 TAM・受注率・ヨミ化率・実施件数（仮説①）</div>
   <div class="chart-scroll" id="chartScroll">
-    <!-- 幅はJSで動的に設定する -->
     <div class="chart-inner" id="chartInner">
       <canvas id="mainChart"></canvas>
     </div>
@@ -284,6 +281,10 @@
     <div class="legend-item">
       <div class="legend-color" id="legendBar" style="background:#3b82f6;opacity:0.8;"></div>
       <span id="legendTam">TAM（仮説①）</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-line" style="background:#fbbf24;"></div>
+      <span>実施件数（件）</span>
     </div>
     <div class="legend-item">
       <div class="legend-line" style="background:#f87171;"></div>
@@ -305,14 +306,14 @@
     <table id="dataTable">
       <thead>
         <tr>
-          <th onclick="sortTable('name')"     data-col="name">業界</th>
-          <th onclick="sortTable('tam')"      data-col="tam">TAM（社）</th>
-          <th onclick="sortTable('total')"    data-col="total">商談件数</th>
-          <th onclick="sortTable('yomi')"     data-col="yomi">ヨミ件数</th>
-          <th onclick="sortTable('yomiRate')" data-col="yomiRate">ヨミ化率</th>
-          <th onclick="sortTable('order')"    data-col="order">受注件数</th>
-          <th onclick="sortTable('orderRate')"data-col="orderRate">受注率</th>
-          <th onclick="sortTable('share')"    data-col="share">TAM構成比</th>
+          <th onclick="sortTable('name')"      data-col="name">業界</th>
+          <th onclick="sortTable('tam')"       data-col="tam">TAM（社）</th>
+          <th onclick="sortTable('total')"     data-col="total">実施件数</th>
+          <th onclick="sortTable('yomi')"      data-col="yomi">ヨミ件数</th>
+          <th onclick="sortTable('yomiRate')"  data-col="yomiRate">ヨミ化率</th>
+          <th onclick="sortTable('order')"     data-col="order">受注件数</th>
+          <th onclick="sortTable('orderRate')" data-col="orderRate">受注率</th>
+          <th onclick="sortTable('share')"     data-col="share">TAM構成比</th>
         </tr>
       </thead>
       <tbody id="tableBody"></tbody>
@@ -324,38 +325,39 @@
 
 <script>
 // ===== DATA =====
+// 1行目（空欄業界）は業界名を「(未分類)」として登録
 const RAW = [
-  { name:"建設・工事",      tam1:200955, tam2:100608, share:19.20, total:69,  yomi:36,  order:9  },
-  { name:"小売",            tam1:95349,  tam2:47736,  share:9.11,  total:54,  yomi:28,  order:8  },
-  { name:"その他サービス",  tam1:81847,  tam2:40977,  share:7.82,  total:74,  yomi:50,  order:19 },
-  { name:"不動産",          tam1:59868,  tam2:29973,  share:5.72,  total:36,  yomi:21,  order:11 },
-  { name:"コンサルティング",tam1:59449,  tam2:29763,  share:5.68,  total:143, yomi:93,  order:17 },
-  { name:"製造",            tam1:49297,  tam2:24680,  share:4.71,  total:28,  yomi:17,  order:5  },
-  { name:"商社",            tam1:48355,  tam2:24209,  share:4.62,  total:50,  yomi:25,  order:7  },
-  { name:"食品",            tam1:38412,  tam2:19231,  share:3.67,  total:35,  yomi:22,  order:4  },
-  { name:"自動車・乗り物",  tam1:38307,  tam2:19178,  share:3.66,  total:24,  yomi:14,  order:4  },
-  { name:"IT",              tam1:35062,  tam2:17554,  share:3.35,  total:214, yomi:157, order:49 },
-  { name:"エンタメ",        tam1:34434,  tam2:17240,  share:3.29,  total:49,  yomi:29,  order:9  },
-  { name:"機械",            tam1:31926,  tam2:15982,  share:3.05,  total:97,  yomi:64,  order:21 },
-  { name:"運輸・物流",      tam1:31399,  tam2:15720,  share:3.00,  total:60,  yomi:29,  order:9  },
-  { name:"医療・福祉",      tam1:30142,  tam2:15091,  share:2.88,  total:92,  yomi:56,  order:24 },
-  { name:"生活用品",        tam1:29095,  tam2:14567,  share:2.78,  total:16,  yomi:6,   order:1  },
-  { name:"人材",            tam1:26586,  tam2:13310,  share:2.54,  total:116, yomi:69,  order:11 },
-  { name:"アパレル・美容",  tam1:24806,  tam2:12419,  share:2.37,  total:32,  yomi:18,  order:5  },
-  { name:"広告",            tam1:22921,  tam2:11476,  share:2.19,  total:15,  yomi:11,  order:2  },
-  { name:"外食",            tam1:19367,  tam2:9694,   share:1.85,  total:22,  yomi:11,  order:6  },
-  { name:"金融",            tam1:15176,  tam2:7598,   share:1.45,  total:18,  yomi:12,  order:2  },
-  { name:"機械関連サービス",tam1:14862,  tam2:7441,   share:1.42,  total:7,   yomi:4,   order:1  },
-  { name:"教育",            tam1:14024,  tam2:7022,   share:1.34,  total:23,  yomi:12,  order:1  },
-  { name:"化学",            tam1:12456,  tam2:6236,   share:1.19,  total:5,   yomi:2,   order:0  },
-  { name:"エネルギー",      tam1:8373,   tam2:4192,   share:0.80,  total:12,  yomi:6,   order:1  },
-  { name:"電気製品",        tam1:7536,   tam2:3773,   share:0.72,  total:10,  yomi:4,   order:2  },
-  { name:"マスコミ",        tam1:6803,   tam2:3406,   share:0.65,  total:8,   yomi:6,   order:1  },
-  { name:"専門サービス",    tam1:2721,   tam2:1362,   share:0.26,  total:1,   yomi:1,   order:0  },
-  { name:"通信",            tam1:2512,   tam2:1258,   share:0.24,  total:13,  yomi:3,   order:0  },
-  { name:"通信機器",        tam1:2407,   tam2:1205,   share:0.23,  total:0,   yomi:0,   order:0  },
-  { name:"ゲーム",          tam1:1675,   tam2:838,    share:0.16,  total:5,   yomi:3,   order:0  },
-  { name:"その他",          tam1:523,    tam2:262,    share:0.05,  total:4,   yomi:2,   order:1  },
+  { name:"(未分類)",          tam1:0,      tam2:0,      share:0,     total:460, yomi:219, order:16 },
+  { name:"IT",                tam1:35062,  tam2:17554,  share:3.35,  total:214, yomi:157, order:49 },
+  { name:"コンサルティング",  tam1:59449,  tam2:29763,  share:5.68,  total:143, yomi:93,  order:17 },
+  { name:"人材",              tam1:26586,  tam2:13310,  share:2.54,  total:116, yomi:69,  order:11 },
+  { name:"機械",              tam1:31926,  tam2:15982,  share:3.05,  total:97,  yomi:64,  order:21 },
+  { name:"医療・福祉",        tam1:30142,  tam2:15091,  share:2.88,  total:92,  yomi:56,  order:24 },
+  { name:"その他サービス",    tam1:81847,  tam2:40977,  share:7.82,  total:74,  yomi:50,  order:19 },
+  { name:"建設・工事",        tam1:200955, tam2:100608, share:19.20, total:69,  yomi:36,  order:9  },
+  { name:"運輸・物流",        tam1:31399,  tam2:15720,  share:3.00,  total:60,  yomi:29,  order:9  },
+  { name:"小売",              tam1:95349,  tam2:47736,  share:9.11,  total:54,  yomi:28,  order:8  },
+  { name:"商社",              tam1:48355,  tam2:24209,  share:4.62,  total:50,  yomi:25,  order:7  },
+  { name:"エンタメ",          tam1:34434,  tam2:17240,  share:3.29,  total:49,  yomi:29,  order:9  },
+  { name:"不動産",            tam1:59868,  tam2:29973,  share:5.72,  total:36,  yomi:21,  order:11 },
+  { name:"食品",              tam1:38412,  tam2:19231,  share:3.67,  total:35,  yomi:22,  order:4  },
+  { name:"アパレル・美容",    tam1:24806,  tam2:12419,  share:2.37,  total:32,  yomi:18,  order:5  },
+  { name:"製造",              tam1:49297,  tam2:24680,  share:4.71,  total:28,  yomi:17,  order:5  },
+  { name:"自動車・乗り物",    tam1:38307,  tam2:19178,  share:3.66,  total:24,  yomi:14,  order:4  },
+  { name:"教育",              tam1:14024,  tam2:7022,   share:1.34,  total:23,  yomi:12,  order:1  },
+  { name:"外食",              tam1:19367,  tam2:9694,   share:1.85,  total:22,  yomi:11,  order:6  },
+  { name:"金融",              tam1:15176,  tam2:7598,   share:1.45,  total:18,  yomi:12,  order:2  },
+  { name:"生活用品",          tam1:29095,  tam2:14567,  share:2.78,  total:16,  yomi:6,   order:1  },
+  { name:"広告",              tam1:22921,  tam2:11476,  share:2.19,  total:15,  yomi:11,  order:2  },
+  { name:"通信",              tam1:2512,   tam2:1258,   share:0.24,  total:13,  yomi:3,   order:0  },
+  { name:"エネルギー",        tam1:8373,   tam2:4192,   share:0.80,  total:12,  yomi:6,   order:1  },
+  { name:"電気製品",          tam1:7536,   tam2:3773,   share:0.72,  total:10,  yomi:4,   order:2  },
+  { name:"マスコミ",          tam1:6803,   tam2:3406,   share:0.65,  total:8,   yomi:6,   order:1  },
+  { name:"機械関連サービス",  tam1:14862,  tam2:7441,   share:1.42,  total:7,   yomi:4,   order:1  },
+  { name:"化学",              tam1:12456,  tam2:6236,   share:1.19,  total:5,   yomi:2,   order:0  },
+  { name:"ゲーム",            tam1:1675,   tam2:838,    share:0.16,  total:5,   yomi:3,   order:0  },
+  { name:"その他",            tam1:523,    tam2:262,    share:0.05,  total:4,   yomi:2,   order:1  },
+  { name:"専門サービス",      tam1:2721,   tam2:1362,   share:0.26,  total:1,   yomi:1,   order:0  },
 ];
 RAW.forEach(d => {
   d.yomiRate  = d.total > 0 ? d.yomi  / d.total * 100 : null;
@@ -393,28 +395,31 @@ function getSortedData() {
 }
 
 // ===== CHART =====
-// Chart.jsのcanvasを毎回作り直すことで残留状態を完全にリセット
 function renderChart(data) {
-  const BAR_W   = 38;   // 1業界あたりの最小幅(px)
-  const MIN_W   = 900;
-  const newW    = Math.max(MIN_W, data.length * BAR_W);
-  const H       = 420;
+  const BAR_W = 44;
+  const MIN_W = 900;
+  const newW  = Math.max(MIN_W, data.length * BAR_W);
+  const H     = 440;
 
-  const inner  = document.getElementById('chartInner');
-  // 古いcanvasを削除して新しいものを生成
+  const inner = document.getElementById('chartInner');
   inner.innerHTML = '';
   inner.style.width  = newW + 'px';
   inner.style.height = H + 'px';
+
   const canvas = document.createElement('canvas');
-  canvas.id     = 'mainChart';
-  canvas.width  = newW;
-  canvas.height = H;
-  canvas.style.width  = newW + 'px';
-  canvas.style.height = H + 'px';
+  canvas.id            = 'mainChart';
+  canvas.width         = newW;
+  canvas.height        = H;
+  canvas.style.width   = newW + 'px';
+  canvas.style.height  = H + 'px';
   inner.appendChild(canvas);
 
   const tamColor  = hypothesis === 1 ? 'rgba(59,130,246,0.75)' : 'rgba(139,92,246,0.75)';
   const tamBorder = hypothesis === 1 ? 'rgba(59,130,246,1)'    : 'rgba(139,92,246,1)';
+
+  // 実施件数の最大値を求めてyCount軸のmaxを設定
+  const maxTotal = Math.max(...data.map(d => d.total));
+  const countMax = Math.ceil(maxTotal / 50) * 50 + 50;
 
   chart = new Chart(canvas, {
     type: 'bar',
@@ -429,14 +434,29 @@ function renderChart(data) {
           borderColor: tamBorder,
           borderWidth: 1,
           yAxisID: 'yLeft',
-          order: 2,
+          order: 3,
+        },
+        {
+          type: 'line',
+          label: '実施件数（件）',
+          data: data.map(d => d.total > 0 ? d.total : null),
+          borderColor: '#fbbf24',
+          backgroundColor: 'rgba(251,191,36,0.10)',
+          pointBackgroundColor: '#fbbf24',
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          borderWidth: 2.5,
+          tension: 0.3,
+          yAxisID: 'yCount',
+          order: 0,
+          spanGaps: false,
         },
         {
           type: 'line',
           label: '受注率（%）',
           data: data.map(d => d.orderRate),
           borderColor: '#f87171',
-          backgroundColor: 'rgba(248,113,113,0.12)',
+          backgroundColor: 'rgba(248,113,113,0.10)',
           pointBackgroundColor: '#f87171',
           pointRadius: 5,
           pointHoverRadius: 7,
@@ -458,13 +478,13 @@ function renderChart(data) {
           borderWidth: 2.5,
           tension: 0.3,
           yAxisID: 'yRight',
-          order: 0,
+          order: 2,
           spanGaps: false,
         },
       ]
     },
     options: {
-      responsive: false,   // ← falseにしてcanvasサイズを自前管理
+      responsive: false,
       animation: false,
       interaction: { mode: 'index', intersect: false },
       plugins: {
@@ -479,8 +499,13 @@ function renderChart(data) {
           callbacks: {
             title: ctx => ctx[0].label,
             label: ctx => {
-              if (ctx.dataset.type === 'bar' || ctx.datasetIndex === 0) {
+              const di = ctx.dataIndex;
+              const d  = data[di];
+              if (ctx.datasetIndex === 0) {
                 return `  ${ctx.dataset.label}: ${fmt(ctx.parsed.y)} 社`;
+              }
+              if (ctx.datasetIndex === 1) {
+                return `  実施件数: ${fmt(d.total)} 件`;
               }
               if (ctx.parsed.y == null) return `  ${ctx.dataset.label}: データなし`;
               return `  ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)}%`;
@@ -489,10 +514,9 @@ function renderChart(data) {
               const d = data[ctx[0].dataIndex];
               return [
                 '',
-                `  商談件数: ${fmt(d.total)} 件`,
                 `  ヨミ件数: ${fmt(d.yomi)} 件`,
                 `  受注件数: ${fmt(d.order)} 件`,
-                `  TAM構成比: ${d.share.toFixed(2)}%`,
+                `  TAM構成比: ${d.share > 0 ? d.share.toFixed(2) + '%' : '—'}`,
               ];
             }
           }
@@ -530,7 +554,22 @@ function renderChart(data) {
             callback: v => v + '%',
           },
           grid: { drawOnChartArea: false },
-        }
+        },
+        yCount: {
+          type: 'linear',
+          position: 'right',
+          min: 0,
+          max: countMax,
+          title: { display: true, text: '実施件数（件）', color: '#d69e2e', font: { size: 11 } },
+          ticks: {
+            color: '#fbbf24',
+            font: { size: 10 },
+            callback: v => v + '件',
+          },
+          grid: { drawOnChartArea: false },
+          // yRightと重ならないようにoffsetを付ける
+          afterFit: scale => { scale.width = 70; },
+        },
       }
     }
   });
@@ -539,7 +578,6 @@ function renderChart(data) {
 // ===== TABLE =====
 function renderTable(data) {
   const tamKey = hypothesis === 1 ? 'tam1' : 'tam2';
-  // TAM降順ランク（全データ基準）
   const allSorted = [...RAW].sort((a,b) => b[tamKey] - a[tamKey]);
   const rankMap = {};
   allSorted.forEach((d, i) => rankMap[d.name] = i + 1);
@@ -562,15 +600,18 @@ function renderTable(data) {
          </div>`
       : `<span class="no-data">—</span>`;
 
+    const tamDisplay = d[tamKey] > 0 ? fmt(d[tamKey]) : '<span class="no-data">—</span>';
+    const shareDisplay = d.share > 0 ? d.share.toFixed(2) + '%' : '<span class="no-data">—</span>';
+
     return `<tr>
       <td><span class="rank-badge ${rankClass}">${rank}</span>&nbsp;${d.name}</td>
-      <td>${fmt(d[tamKey])}</td>
+      <td>${tamDisplay}</td>
       <td>${d.total > 0 ? fmt(d.total) : '<span class="no-data">—</span>'}</td>
       <td>${d.yomi  > 0 ? fmt(d.yomi)  : '<span class="no-data">—</span>'}</td>
       <td>${yomiBar}</td>
       <td>${d.total > 0 ? fmt(d.order) : '<span class="no-data">—</span>'}</td>
       <td>${orderBar}</td>
-      <td>${d.share.toFixed(2)}%</td>
+      <td>${shareDisplay}</td>
     </tr>`;
   }).join('');
 }
@@ -581,7 +622,7 @@ function switchHypothesis(h) {
   document.getElementById('btn1').classList.toggle('active', h === 1);
   document.getElementById('btn2').classList.toggle('active', h === 2);
   document.getElementById('chartTitle').textContent =
-    `業界別 TAM・受注率・ヨミ化率（仮説${h === 1 ? '①' : '②'}）`;
+    `業界別 TAM・受注率・ヨミ化率・実施件数（仮説${h === 1 ? '①' : '②'}）`;
   document.getElementById('legendTam').textContent =
     `TAM（仮説${h === 1 ? '①' : '②'}）`;
   document.getElementById('legendBar').style.background =
